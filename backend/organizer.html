@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EventHub | Organizer Dashboard</title>
+    <link rel="stylesheet" href="style.css"/>
+    <style>
+        body { padding: 0; min-height: 100vh; background: #09090f; }
+        .org-header {
+            background: #13131f;
+            border-bottom: 1px solid #2a2a45;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .org-logo { font-size: 22px; font-weight: 800; color: #00c9a7; }
+        .org-role-tag {
+            background: linear-gradient(135deg, #7b61ff, #00c9a7);
+            color: #fff; font-size: 11px; font-weight: 700;
+            padding: 4px 10px; border-radius: 20px; margin-left: 10px;
+        }
+        .org-user { display:flex; align-items:center; gap:10px; color:#aaa; font-size:13px; }
+        .org-avatar {
+            width:36px; height:36px; border-radius:50%;
+            background: linear-gradient(135deg, #7b61ff, #00c9a7);
+            display:flex; align-items:center; justify-content:center;
+            font-weight:700; font-size:14px; color:#fff;
+        }
+        .btn-logout { background:none; border:1px solid #ff4d6d; color:#ff4d6d; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
+
+        .org-body { max-width: 1000px; margin: 0 auto; padding: 28px 20px 80px; }
+
+        .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px; }
+        .stat-card {
+            background:#13131f; border:1px solid #2a2a45; border-radius:16px;
+            padding:20px; text-align:center;
+        }
+        .stat-num { font-size:32px; font-weight:800; color:#00c9a7; }
+        .stat-label { font-size:12px; color:#666; margin-top:4px; }
+
+        .section-title {
+            font-size:18px; font-weight:800; margin-bottom:16px;
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .btn-add {
+            background: linear-gradient(135deg,#00c9a7,#7b61ff);
+            border:none; color:#fff; padding:10px 20px; border-radius:10px;
+            font-weight:700; font-size:13px; cursor:pointer;
+        }
+
+        /* ADD EVENT FORM */
+        .add-form {
+            background:#13131f; border:1px solid #2a2a45; border-radius:20px;
+            padding:24px; margin-bottom:28px; display:none;
+        }
+        .add-form.open { display:block; }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .form-group { display:flex; flex-direction:column; gap:6px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size:12px; color:#888; font-weight:600; }
+        .form-group input, .form-group select, .form-group textarea {
+            padding:11px 14px; background:#0d0d1a; border:1.5px solid #2a2a45;
+            border-radius:10px; color:#fff; font-size:13px; outline:none;
+            transition:.2s; resize:none; font-family:inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:#00c9a7; }
+        .form-group select option { background:#13131f; }
+        .form-actions { display:flex; gap:10px; margin-top:16px; }
+        .btn-save { background:linear-gradient(135deg,#ff6b35,#f72585); border:none; color:#fff; padding:12px 28px; border-radius:10px; font-weight:700; cursor:pointer; }
+        .btn-cancel2 { background:#1c1c2e; border:1px solid #2a2a45; color:#aaa; padding:12px 20px; border-radius:10px; font-weight:700; cursor:pointer; }
+
+        /* EVENT CARDS */
+        .events-table { display:flex; flex-direction:column; gap:12px; }
+        .org-event-card {
+            background:#13131f; border:1px solid #2a2a45; border-radius:16px;
+            padding:18px 20px; display:flex; align-items:center; gap:16px;
+        }
+        .org-event-icon { font-size:32px; width:50px; text-align:center; }
+        .org-event-info { flex:1; }
+        .org-event-title { font-weight:700; font-size:15px; margin-bottom:4px; }
+        .org-event-meta  { font-size:12px; color:#777; line-height:1.8; }
+        .org-event-stats { text-align:right; }
+        .org-seats { font-size:20px; font-weight:800; color:#00c9a7; }
+        .org-seats-label { font-size:11px; color:#555; }
+        .seats-bar { width:80px; height:4px; background:#2a2a45; border-radius:4px; margin:6px 0 0 auto; }
+        .seats-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#00c9a7,#7b61ff); transition:.5s; }
+        .org-actions { display:flex; gap:8px; margin-top:10px; }
+        .btn-edit   { background:#1c1c2e; border:1px solid #2a2a45; color:#aaa; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
+        .btn-delete { background:none; border:1px solid #ff4d6d; color:#ff4d6d; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
+        .badge-full { background:#ff4d6d; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:8px; }
+        .empty-org { text-align:center; padding:50px 20px; color:#555; }
+        .empty-org div:first-child { font-size:48px; margin-bottom:12px; }
+    </style>
+</head>
+<body>
+
+<div class="org-header">
+    <div style="display:flex;align-items:center;gap:8px;">
+        <div class="org-logo">EventHub</div>
+        <span class="org-role-tag">🏢 Organizer</span>
+    </div>
+    <div class="org-user">
+        <div class="org-avatar" id="orgAvatar">O</div>
+        <span id="orgName">Organizer</span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="org-body">
+
+    <!-- STATS -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-num" id="statEvents">0</div>
+            <div class="stat-label">My Events</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statTickets">0</div>
+            <div class="stat-label">Tickets Sold</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="statRevenue">₹0</div>
+            <div class="stat-label">Est. Revenue</div>
+        </div>
+    </div>
+
+    <!-- ADD EVENT -->
+    <div class="section-title">
+        <span>My Events</span>
+        <button class="btn-add" onclick="toggleForm()">+ Add New Event</button>
+    </div>
+
+    <div class="add-form" id="addForm">
+        <h3 style="margin-bottom:18px;font-size:16px;" id="formTitle">➕ Add New Event</h3>
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Event Title *</label>
+                <input type="text" id="fTitle" placeholder="e.g. Rock Night at Bhavani Island"/>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="fCategory">
+                    <option value="music">🎵 Music</option>
+                    <option value="jazz">🎷 Jazz</option>
+                    <option value="hiphop">🎤 Hip-Hop</option>
+                    <option value="classical">🎻 Classical</option>
+                    <option value="tech">💻 Tech</option>
+                    <option value="food">🍕 Food</option>
+                    <option value="sports">⚽ Sports</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Price (₹) *</label>
+                <input type="number" id="fPrice" placeholder="299" min="0"/>
+            </div>
+            <div class="form-group">
+                <label>Date *</label>
+                <input type="date" id="fDate"/>
+            </div>
+            <div class="form-group">
+                <label>Time *</label>
+                <input type="time" id="fTime"/>
+            </div>
+            <div class="form-group">
+                <label>Total Capacity *</label>
+                <input type="number" id="fCapacity" placeholder="200" min="1"/>
+            </div>
+            <div class="form-group full">
+                <label>Venue / Location *</label>
+                <input type="text" id="fLocation" placeholder="e.g. Siddhartha Amphitheatre, Vijayawada"/>
+            </div>
+            <div class="form-group full">
+                <label>Event Description</label>
+                <textarea id="fDesc" rows="3" placeholder="Tell attendees what to expect..."></textarea>
+            </div>
+            <div class="form-group full">
+                <label>Image URL (optional)</label>
+                <input type="text" id="fImage" placeholder="https://... or leave blank for default"/>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-save" onclick="saveEvent()">💾 Save Event</button>
+            <button class="btn-cancel2" onclick="toggleForm()">Cancel</button>
+        </div>
+        <div id="formErr" style="color:#ff4d6d;font-size:13px;margin-top:10px;display:none;"></div>
+    </div>
+
+    <!-- EVENTS LIST -->
+    <div class="events-table" id="eventsTable">
+        <div class="empty-org">
+            <div>🎪</div>
+            <div>No events yet. Click "+ Add New Event" to get started!</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const getUser    = () => JSON.parse(localStorage.getItem('eventhub_user') || 'null');
+const getTickets = () => JSON.parse(localStorage.getItem('eventhub_tickets') || '[]');
+const getOrgEvents = () => JSON.parse(localStorage.getItem('eventhub_org_events') || '[]');
+const saveOrgEvents = e => localStorage.setItem('eventhub_org_events', JSON.stringify(e));
+
+let editingId = null;
+
+// ── GUARD ──────────────────────────────────────────────────────────────────
+window.onload = function() {
+    const user = getUser();
+    if (!user || user.role !== 'organizer') {
+        alert('Access denied. Please login as an organizer.');
+        window.location.href = 'login.html';
+        return;
+    }
+    const initials = ((user.firstName||'')[0] || 'O').toUpperCase();
+    document.getElementById('orgAvatar').textContent = initials;
+    document.getElementById('orgName').textContent   = user.firstName || 'Organizer';
+    renderEvents();
+    updateStats();
+};
+
+function logout() {
+    localStorage.removeItem('eventhub_user');
+    window.location.href = 'login.html';
+}
+
+// ── FORM TOGGLE ────────────────────────────────────────────────────────────
+function toggleForm(ev) {
+    const form = document.getElementById('addForm');
+    const open = form.classList.toggle('open');
+    if (!open) { clearForm(); editingId = null; }
+    if (open && !ev) {
+        document.getElementById('formTitle').textContent = '➕ Add New Event';
+    }
+    if (open) form.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function clearForm() {
+    ['fTitle','fPrice','fDate','fTime','fCapacity','fLocation','fDesc','fImage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    document.getElementById('fCategory').value = 'music';
+}
+
+// ── SAVE EVENT ─────────────────────────────────────────────────────────────
+function saveEvent() {
+    const user = getUser();
+    const title    = document.getElementById('fTitle').value.trim();
+    const price    = parseInt(document.getElementById('fPrice').value);
+    const dateRaw  = document.getElementById('fDate').value;
+    const timeRaw  = document.getElementById('fTime').value;
+    const capacity = parseInt(document.getElementById('fCapacity').value);
+    const location = document.getElementById('fLocation').value.trim();
+    const errEl    = document.getElementById('formErr');
+
+    if (!title || !dateRaw || !timeRaw || !location || isNaN(price) || isNaN(capacity)) {
+        errEl.textContent = 'Please fill all required fields.';
+        errEl.style.display = 'block';
+        setTimeout(() => errEl.style.display = 'none', 3000);
+        return;
+    }
+
+    // Format date nicely
+    const dateObj  = new Date(dateRaw + 'T' + timeRaw);
+    const dateStr  = dateObj.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    const timeStr  = dateObj.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+
+    const events = getOrgEvents();
+    if (editingId) {
+        const idx = events.findIndex(e => e.id === editingId);
+        if (idx !== -1) {
+            events[idx] = { ...events[idx],
+                title, price, date: dateStr, time: timeStr, capacity, location,
+                category: document.getElementById('fCategory').value,
+                description: document.getElementById('fDesc').value.trim(),
+                image: document.getElementById('fImage').value.trim() || 'event1.jpg'
+            };
+        }
+        editingId = null;
+    } else {
+        events.push({
+            id:          'org_' + Date.now(),
+            title, price, date: dateStr, time: timeStr, capacity, location,
+            category:    document.getElementById('fCategory').value,
+            description: document.getElementById('fDesc').value.trim(),
+            image:       document.getElementById('fImage').value.trim() || 'event1.jpg',
+            organizer:   user.email,
+            createdAt:   new Date().toISOString()
+        });
+    }
+
+    saveOrgEvents(events);
+    // Also push into the shared ALL_EVENTS pool used by index.html
+    syncToSharedPool(events);
+    clearForm();
+    document.getElementById('addForm').classList.remove('open');
+    renderEvents();
+    updateStats();
+}
+
+function syncToSharedPool(orgEvents) {
+    // Merge organizer events into a shared localStorage key that index.html can read
+    localStorage.setItem('eventhub_extra_events', JSON.stringify(orgEvents));
+}
+
+// ── DELETE ─────────────────────────────────────────────────────────────────
+function deleteEvent(id) {
+    if (!confirm('Delete this event? This cannot be undone.')) return;
+    const events = getOrgEvents().filter(e => e.id !== id);
+    saveOrgEvents(events);
+    syncToSharedPool(events);
+    renderEvents();
+    updateStats();
+}
+
+// ── EDIT ───────────────────────────────────────────────────────────────────
+function editEvent(id) {
+    const ev = getOrgEvents().find(e => e.id === id);
+    if (!ev) return;
+    editingId = id;
+    document.getElementById('fTitle').value    = ev.title;
+    document.getElementById('fPrice').value    = ev.price;
+    document.getElementById('fCapacity').value = ev.capacity;
+    document.getElementById('fLocation').value = ev.location;
+    document.getElementById('fCategory').value = ev.category;
+    document.getElementById('fDesc').value     = ev.description || '';
+    document.getElementById('fImage').value    = ev.image || '';
+    document.getElementById('formTitle').textContent = '✏️ Edit Event';
+    document.getElementById('addForm').classList.add('open');
+    document.getElementById('addForm').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function renderEvents() {
+    const events  = getOrgEvents();
+    const tickets = getTickets();
+    const table   = document.getElementById('eventsTable');
+
+    if (!events.length) {
+        table.innerHTML = `<div class="empty-org"><div>🎪</div><div>No events yet. Click "+ Add New Event" to get started!</div></div>`;
+        return;
+    }
+
+    const catIcons = { music:'🎵', jazz:'🎷', hiphop:'🎤', classical:'🎻', tech:'💻', food:'🍕', sports:'⚽' };
+
+    table.innerHTML = events.map(ev => {
+        const sold     = tickets.filter(t => t.eventId == ev.id).length;
+        const pct      = ev.capacity ? Math.min(Math.round(sold / ev.capacity * 100), 100) : 0;
+        const isFull   = sold >= ev.capacity;
+        return `
+        <div class="org-event-card">
+            <div class="org-event-icon">${catIcons[ev.category] || '🎪'}</div>
+            <div class="org-event-info">
+                <div class="org-event-title">
+                    ${ev.title}
+                    ${isFull ? '<span class="badge-full">FULL</span>' : ''}
+                </div>
+                <div class="org-event-meta">
+                    📅 ${ev.date} • ${ev.time}<br/>
+                    📍 ${ev.location}<br/>
+                    💰 ₹${ev.price} per ticket
+                </div>
+                <div class="org-actions">
+                    <button class="btn-edit"   onclick="editEvent('${ev.id}')">✏️ Edit</button>
+                    <button class="btn-delete" onclick="deleteEvent('${ev.id}')">🗑️ Delete</button>
+                </div>
+            </div>
+            <div class="org-event-stats">
+                <div class="org-seats">${sold} / ${ev.capacity}</div>
+                <div class="org-seats-label">tickets sold</div>
+                <div class="seats-bar">
+                    <div class="seats-fill" style="width:${pct}%;background:${isFull ? '#ff4d6d' : 'linear-gradient(90deg,#00c9a7,#7b61ff)'};"></div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateStats() {
+    const events  = getOrgEvents();
+    const tickets = getTickets();
+    const user    = getUser();
+    const myTickets = tickets.filter(t => events.some(e => e.id == t.eventId));
+    const revenue   = myTickets.reduce((s, t) => s + (t.price || 0), 0);
+
+    document.getElementById('statEvents').textContent  = events.length;
+    document.getElementById('statTickets').textContent = myTickets.length;
+    document.getElementById('statRevenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+}
+</script>
+</body>
+</html>

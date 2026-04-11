@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EventHub | Event Details</title>
+    <link rel="stylesheet" href="style.css"/>
+    <style>
+        body { padding:0; min-height:100vh; }
+        .detail-hero {
+            position:relative; height:300px; overflow:hidden;
+            background: linear-gradient(135deg,#1e1040,#0d2b3e);
+        }
+        .detail-hero img { width:100%; height:100%; object-fit:cover; opacity:.6; }
+        .hero-overlay {
+            position:absolute; inset:0;
+            background:linear-gradient(to top, #09090f 30%, transparent);
+        }
+        .hero-back {
+            position:absolute; top:16px; left:16px;
+            background:rgba(0,0,0,0.5); border:none; border-radius:50%;
+            width:40px; height:40px; font-size:18px; cursor:pointer; color:#fff;
+            backdrop-filter:blur(8px);
+        }
+        .hero-fav {
+            position:absolute; top:16px; right:16px;
+            background:rgba(0,0,0,0.5); border:none; border-radius:50%;
+            width:40px; height:40px; font-size:18px; cursor:pointer;
+            backdrop-filter:blur(8px);
+        }
+        .detail-body { max-width:680px; margin:0 auto; padding:20px 20px 120px; }
+        .detail-tag { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:800; margin-bottom:10px; background:#7b61ff; color:#fff; }
+        .detail-title { font-size:26px; font-weight:900; line-height:1.2; margin-bottom:16px; }
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+        .info-box {
+            background:#13131f; border:1px solid #2a2a45; border-radius:14px;
+            padding:14px 16px; display:flex; align-items:flex-start; gap:10px;
+        }
+        .info-icon { font-size:20px; }
+        .info-label { font-size:11px; color:#666; margin-bottom:2px; }
+        .info-val   { font-size:13px; font-weight:700; }
+        .seats-section { margin:20px 0; }
+        .seats-bar-big { height:8px; background:#2a2a45; border-radius:8px; margin-top:8px; overflow:hidden; }
+        .seats-fill-big { height:100%; border-radius:8px; background:linear-gradient(90deg,#00c9a7,#7b61ff); transition:.5s; }
+        .desc-section { margin:20px 0; }
+        .desc-section h3 { font-size:15px; margin-bottom:8px; color:#aaa; }
+        .desc-section p  { font-size:14px; color:#888; line-height:1.7; }
+        .organizer-box {
+            background:#13131f; border:1px solid #2a2a45; border-radius:14px;
+            padding:16px; display:flex; align-items:center; gap:14px; margin:20px 0;
+        }
+        .org-av { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#7b61ff,#00c9a7); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; }
+        .org-info-name  { font-weight:700; font-size:14px; }
+        .org-info-label { font-size:12px; color:#666; }
+
+        /* STICKY BOTTOM BOOK BAR */
+        .book-bar {
+            position:fixed; bottom:0; left:0; right:0;
+            background:#13131f; border-top:1px solid #2a2a45;
+            padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+            z-index:200;
+        }
+        .book-price { font-size:24px; font-weight:900; color:#00c9a7; }
+        .book-price span { font-size:12px; color:#666; font-weight:400; display:block; }
+        .btn-book-detail {
+            background:linear-gradient(135deg,#00c9a7,#7b61ff);
+            border:none; color:#fff; padding:14px 32px; border-radius:14px;
+            font-weight:800; font-size:15px; cursor:pointer; transition:.2s;
+        }
+        .btn-book-detail:hover { transform:translateY(-1px); }
+        .btn-book-detail:disabled { background:#2a2a45; color:#555; transform:none; cursor:not-allowed; }
+
+        /* REVIEW SECTION */
+        .reviews-section { margin:20px 0; }
+        .reviews-section h3 { font-size:15px; margin-bottom:12px; color:#aaa; }
+        .review-card {
+            background:#13131f; border:1px solid #2a2a45; border-radius:12px;
+            padding:14px; margin-bottom:10px;
+        }
+        .review-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .review-av { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#7b61ff,#00c9a7); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+        .review-name { font-size:13px; font-weight:700; }
+        .review-stars { color:#f5c518; font-size:12px; }
+        .review-text { font-size:13px; color:#888; line-height:1.5; }
+        .add-review { margin-top:14px; }
+        .add-review textarea {
+            width:100%; padding:12px; background:#0d0d1a; border:1.5px solid #2a2a45;
+            border-radius:10px; color:#fff; font-size:13px; resize:none; outline:none;
+            font-family:inherit; box-sizing:border-box;
+        }
+        .add-review textarea:focus { border-color:#00c9a7; }
+        .star-row { display:flex; gap:6px; margin:8px 0; }
+        .star-btn { background:none; border:none; font-size:22px; cursor:pointer; color:#555; transition:.1s; }
+        .star-btn.lit { color:#f5c518; }
+        .btn-review { background:linear-gradient(135deg,#00c9a7,#7b61ff); border:none; color:#fff; padding:10px 20px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; }
+    </style>
+</head>
+<body>
+
+<div class="detail-hero">
+    <img id="heroImg" src="" alt="Event" onerror="this.style.display='none'"/>
+    <div class="hero-overlay"></div>
+    <button class="hero-back" onclick="history.back()">←</button>
+    <button class="hero-fav" id="favBtn" onclick="toggleFav()">🤍</button>
+</div>
+
+<div class="detail-body">
+    <div class="detail-tag" id="detailTag">MUSIC</div>
+    <div class="detail-title" id="detailTitle">Loading...</div>
+
+    <div class="info-grid">
+        <div class="info-box">
+            <div class="info-icon">📅</div>
+            <div><div class="info-label">Date</div><div class="info-val" id="detailDate">—</div></div>
+        </div>
+        <div class="info-box">
+            <div class="info-icon">⏰</div>
+            <div><div class="info-label">Time</div><div class="info-val" id="detailTime">—</div></div>
+        </div>
+        <div class="info-box" style="grid-column:1/-1;">
+            <div class="info-icon">📍</div>
+            <div><div class="info-label">Venue</div><div class="info-val" id="detailLocation">—</div></div>
+        </div>
+    </div>
+
+    <div class="seats-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:#888;">🎫 Seats Available</span>
+            <span style="font-size:13px;font-weight:700;" id="seatsText">—</span>
+        </div>
+        <div class="seats-bar-big">
+            <div class="seats-fill-big" id="seatsFill" style="width:0%"></div>
+        </div>
+    </div>
+
+    <div class="desc-section">
+        <h3>About this Event</h3>
+        <p id="detailDesc">No description available.</p>
+    </div>
+
+    <div class="organizer-box">
+        <div class="org-av" id="orgAv">O</div>
+        <div>
+            <div class="org-info-name" id="orgName">EventHub Organizer</div>
+            <div class="org-info-label">🏢 Event Organizer</div>
+        </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="reviews-section">
+        <h3>⭐ Reviews</h3>
+        <div id="reviewsList"></div>
+        <div class="add-review" id="addReviewSection">
+            <div class="star-row" id="starRow">
+                <button class="star-btn" onclick="setRating(1)">★</button>
+                <button class="star-btn" onclick="setRating(2)">★</button>
+                <button class="star-btn" onclick="setRating(3)">★</button>
+                <button class="star-btn" onclick="setRating(4)">★</button>
+                <button class="star-btn" onclick="setRating(5)">★</button>
+            </div>
+            <textarea id="reviewText" rows="3" placeholder="Share your experience about this event..."></textarea>
+            <button class="btn-review" onclick="submitReview()" style="margin-top:8px;">Post Review</button>
+        </div>
+    </div>
+</div>
+
+<div class="book-bar">
+    <div class="book-price">
+        <span>Price per ticket</span>
+        ₹<span id="detailPrice">0</span>
+    </div>
+    <button class="btn-book-detail" id="bookBtn" onclick="bookNow()">Book Now</button>
+</div>
+
+<script>
+const ALL_EVENTS = [
+    { id:1,  title:"National Music Festival",   category:"music",    date:"May 30, 2026", time:"6:00 PM",  location:"Siddhartha Amphitheatre, Vijayawada", price:499,  capacity:200, image:"event1.jpg", description:"Vijayawada's biggest music celebration featuring top national artists across genres. Food stalls, merchandise, and an unforgettable night under the stars." },
+    { id:2,  title:"Symphony of Sound",         category:"classical",date:"Jun 10, 2026", time:"7:30 PM",  location:"Tummalapalli Kalakshetram, Vijayawada",price:750,  capacity:150, image:"event2.jpg", description:"An elegant evening of classical music performed by the Andhra Pradesh State Orchestra. Dress code: Smart Casual." },
+    { id:3,  title:"Jazz After Dark",           category:"jazz",     date:"May 28, 2026", time:"8:00 PM",  location:"PWD Grounds, Vijayawada",            price:350,  capacity:100, image:"event3.jpg", description:"Vijayawada's premier jazz evening under the open sky. Featuring local and guest jazz artists, cocktails, and a sophisticated ambiance." },
+    { id:4,  title:"Hip-Hop Nation Tour",       category:"hiphop",   date:"Jul 1, 2026",  time:"7:00 PM",  location:"IGMC Stadium, Vijayawada",            price:899,  capacity:500, image:"event4.jpg", description:"The biggest hip-hop tour to hit Vijayawada. Multiple artists, laser shows, and a crowd that lives for the beat." },
+    { id:5,  title:"TechFest Vijayawada 2026",  category:"tech",     date:"Jun 20, 2026", time:"9:00 AM",  location:"SRM University, Vijayawada",          price:299,  capacity:300, image:"event5.jpg", description:"Annual technology festival with hackathons, startup pitches, AI/ML workshops, and networking sessions with industry leaders." },
+    { id:6,  title:"Food & Culture Fest",       category:"food",     date:"Jun 5, 2026",  time:"11:00 AM", location:"Rajiv Gandhi Park, Vijayawada",       price:150,  capacity:400, image:"event6.jpg", description:"A vibrant celebration of Andhra cuisine and culture. 50+ food stalls, folk performances, and live cooking demos by celebrity chefs." },
+    { id:7,  title:"Cricket Premier League",    category:"sports",   date:"Jun 15, 2026", time:"3:00 PM",  location:"Indira Gandhi Stadium, Vijayawada",   price:400,  capacity:1000,image:"event7.jpg", description:"City-level T20 cricket tournament. 8 teams, 3 days of matches, live commentary, and prizes for the champions." },
+    { id:8,  title:"Alternative Waves Fest",    category:"music",    date:"Jul 12, 2026", time:"5:00 PM",  location:"Bhavani Island, Vijayawada",          price:550,  capacity:250, image:"event1.jpg", description:"An alternative music festival set on the scenic Bhavani Island. Indie bands, alternative rock, and electronic artists." },
+    { id:9,  title:"Startup Summit 2026",       category:"tech",     date:"Jul 8, 2026",  time:"9:30 AM",  location:"VUDA Community Hall, Vijayawada",     price:199,  capacity:180, image:"event9.jpg", description:"Connect with 50+ startups, investors, and mentors. Panel discussions, fireside chats, and a pitch competition with ₹1L prize." },
+    { id:10, title:"Classical Fusion Night",    category:"classical",date:"Jun 25, 2026", time:"7:00 PM",  location:"Punnami Ghat Grounds, Vijayawada",    price:600,  capacity:120, image:"event2.jpg", description:"A unique blend of Carnatic classical music with Western fusion elements. An artistic experience unlike anything else in the city." },
+    { id:11, title:"Spice Food Trail",          category:"food",     date:"May 25, 2026", time:"10:00 AM", location:"Kanaka Durga Road, Vijayawada",       price:120,  capacity:350, image:"event6.jpg", description:"Walk through Vijayawada's iconic spice trail. Taste authentic Andhra street food, interact with local vendors, and discover hidden food gems." },
+    { id:12, title:"Dance Mania Championship",  category:"music",    date:"Jul 20, 2026", time:"4:00 PM",  location:"JNTU Auditorium, Vijayawada",         price:250,  capacity:220, image:"event12.jpg",description:"Vijayawada's biggest dance competition. Classical, western, hip-hop, and freestyle categories. Cash prizes for winners!" },
+];
+
+const getUser    = () => JSON.parse(localStorage.getItem('eventhub_user')      || 'null');
+const getFavs    = () => JSON.parse(localStorage.getItem('eventhub_favorites') || '[]');
+const saveFavs   = f  => localStorage.setItem('eventhub_favorites', JSON.stringify(f));
+const getTickets = () => JSON.parse(localStorage.getItem('eventhub_tickets')   || '[]');
+const getReviews = () => JSON.parse(localStorage.getItem('eventhub_reviews')   || '{}');
+const saveReviews= r  => localStorage.setItem('eventhub_reviews', JSON.stringify(r));
+
+let currentEvent = null;
+let userRating   = 0;
+
+function getEventId() {
+    return parseInt(new URLSearchParams(window.location.search).get('id'));
+}
+
+function getAllEvents() {
+    const extra = JSON.parse(localStorage.getItem('eventhub_extra_events') || '[]');
+    return [...ALL_EVENTS, ...extra];
+}
+
+function getBookedCount(evId) {
+    return getTickets().filter(t => Number(t.eventId) === Number(evId)).length;
+}
+
+window.onload = function() {
+    const id = getEventId();
+    const ev = getAllEvents().find(e => e.id == id);
+    if (!ev) { document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;">Event not found. <a href="index.html" style="color:#00c9a7;">Go Home</a></div>'; return; }
+    currentEvent = ev;
+    render(ev);
+    renderReviews(ev.id);
+};
+
+function render(ev) {
+    document.title = `EventHub | ${ev.title}`;
+    document.getElementById('heroImg').src        = ev.image;
+    document.getElementById('detailTag').textContent   = ev.category.toUpperCase();
+    document.getElementById('detailTitle').textContent = ev.title;
+    document.getElementById('detailDate').textContent  = ev.date;
+    document.getElementById('detailTime').textContent  = ev.time;
+    document.getElementById('detailLocation').textContent = ev.location;
+    document.getElementById('detailPrice').textContent = ev.price;
+    document.getElementById('detailDesc').textContent  = ev.description || 'An exciting event in Vijayawada. Book your tickets now!';
+
+    // Organizer
+    const orgName = ev.organizer || 'EventHub';
+    document.getElementById('orgAv').textContent   = orgName[0].toUpperCase();
+    document.getElementById('orgName').textContent = orgName;
+
+    // Seats
+    const booked   = getBookedCount(ev.id);
+    const left     = Math.max(ev.capacity - booked, 0);
+    const pct      = ev.capacity ? Math.min(Math.round(booked / ev.capacity * 100), 100) : 0;
+    document.getElementById('seatsText').textContent = `${left} of ${ev.capacity} left`;
+    document.getElementById('seatsFill').style.width  = pct + '%';
+    document.getElementById('seatsFill').style.background = pct >= 90 ? '#ff4d6d' : 'linear-gradient(90deg,#00c9a7,#7b61ff)';
+
+    const isFull = left <= 0;
+    const bookBtn = document.getElementById('bookBtn');
+    bookBtn.textContent = isFull ? 'Sold Out' : 'Book Now';
+    bookBtn.disabled    = isFull;
+
+    // Fav
+    const isFav = getFavs().includes(ev.id);
+    document.getElementById('favBtn').textContent = isFav ? '❤️' : '🤍';
+}
+
+function toggleFav() {
+    if (!currentEvent) return;
+    let favs   = getFavs();
+    const isFav = favs.includes(currentEvent.id);
+    favs = isFav ? favs.filter(f => f !== currentEvent.id) : [...favs, currentEvent.id];
+    saveFavs(favs);
+    document.getElementById('favBtn').textContent = isFav ? '🤍' : '❤️';
+}
+
+function bookNow() {
+    const user = getUser();
+    if (!user) {
+        if (confirm('Please login to book. Go to login page?')) window.location.href = 'login.html';
+        return;
+    }
+    // Pass to payment page
+    sessionStorage.setItem('pending_event', JSON.stringify(currentEvent));
+    window.location.href = 'payment.html';
+}
+
+// ── REVIEWS ────────────────────────────────────────────────────────────────
+function setRating(n) {
+    userRating = n;
+    document.querySelectorAll('.star-btn').forEach((btn, i) => {
+        btn.classList.toggle('lit', i < n);
+    });
+}
+
+function submitReview() {
+    const user = getUser();
+    if (!user) { alert('Please login to post a review.'); return; }
+    const text = document.getElementById('reviewText').value.trim();
+    if (!text || !userRating) { alert('Please add a rating and a comment.'); return; }
+
+    const reviews = getReviews();
+    const evId    = String(currentEvent.id);
+    if (!reviews[evId]) reviews[evId] = [];
+    reviews[evId].unshift({
+        name:   user.firstName || user.email,
+        rating: userRating,
+        text,
+        date:   new Date().toLocaleDateString()
+    });
+    saveReviews(reviews);
+    document.getElementById('reviewText').value = '';
+    setRating(0);
+    renderReviews(currentEvent.id);
+}
+
+function renderReviews(evId) {
+    const reviews = getReviews()[String(evId)] || [];
+    const box     = document.getElementById('reviewsList');
+    if (!reviews.length) {
+        box.innerHTML = '<div style="color:#555;font-size:13px;padding:10px 0;">No reviews yet. Be the first!</div>';
+        return;
+    }
+    box.innerHTML = reviews.map(r => `
+        <div class="review-card">
+            <div class="review-header">
+                <div class="review-av">${r.name[0].toUpperCase()}</div>
+                <div>
+                    <div class="review-name">${r.name}</div>
+                    <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} <span style="color:#555;font-size:11px;">${r.date}</span></div>
+                </div>
+            </div>
+            <div class="review-text">${r.text}</div>
+        </div>`).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EventHub | Vijayawada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 24px 60px;
+  position: relative;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.25);
+  border-radius: 40px; padding: 6px 18px;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeUp 0.7s ease both;
+}
+.hero-eyebrow span { width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(40px, 8vw, 88px);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+.hero-title .line1 { display:block; color:#fff; }
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(135deg, #ff6b35 0%, #f72585 50%, #7b61ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-sub {
+  font-size: 17px; color: var(--text2); max-width: 480px;
+  line-height: 1.7; margin-bottom: 44px;
+  animation: fadeUp 0.7s 0.2s ease both;
+}
+.hero-cta {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.7s 0.3s ease both;
+}
+.cta-primary {
+  padding: 16px 42px;
+  background: linear-gradient(135deg, #ff6b35, #f72585);
+  color: #fff; border: none; border-radius: 50px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 8px 40px rgba(255,107,53,0.4);
+  transition: all 0.3s;
+  text-decoration: none; display: inline-block;
+}
+.cta-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 50px rgba(255,107,53,0.55); }
+.cta-secondary {
+  padding: 16px 36px;
+  background: rgba(255,255,255,0.06); color: var(--text2);
+  border: 1.5px solid rgba(255,255,255,0.12); border-radius: 50px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  backdrop-filter: blur(10px); transition: all 0.3s;
+  text-decoration: none; display: inline-block;
+}
+.cta-secondary:hover { border-color: rgba(255,255,255,0.3); color: #fff; transform: translateY(-2px); }
+
+/* ── FLOATING CARDS ── */
+.hero-float-cards {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.float-card {
+  position: absolute;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 12px 16px;
+  font-size: 12px; color: var(--text2);
+  backdrop-filter: blur(10px);
+  animation: floatCard 6s ease-in-out infinite;
+}
+.float-card strong { display: block; color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.fc1 { top: 18%; left: 5%; animation-delay: 0s; }
+.fc2 { top: 30%; right: 4%; animation-delay: 1.5s; }
+.fc3 { bottom: 22%; left: 8%; animation-delay: 3s; }
+@keyframes floatCard {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+@media(max-width:768px){ .float-card { display: none; } }
+
+/* ── STATS ROW ── */
+.stats-strip {
+  display: flex; justify-content: center; gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  padding: 28px 24px;
+  animation: fadeUp 0.7s 0.4s ease both;
+}
+.stat-item {
+  flex: 1; max-width: 200px;
+  text-align: center; padding: 0 24px;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 36px; font-weight: 800;
+  background: linear-gradient(135deg, #ff6b35, #f72585);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-lbl { font-size: 12px; color: var(--text3); margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── FEATURED EVENTS ── */
+.featured-sec {
+  padding: 60px 24px;
+  max-width: 1200px; margin: 0 auto;
+}
+.sec-label {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.sec-label .dot { width:8px;height:8px;border-radius:50%;background:var(--accent); }
+.sec-label span { font-size:11px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase; }
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px; font-weight: 800; margin-bottom: 32px;
+}
+.featured-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+}
+@media(max-width:700px){ .featured-grid { grid-template-columns: 1fr; } }
+
+.feat-card {
+  border-radius: 24px; overflow: hidden; cursor: pointer;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s;
+  border: 1px solid var(--border);
+}
+.feat-card:hover { transform: translateY(-6px); box-shadow: 0 32px 80px rgba(0,0,0,0.6); }
+.feat-card.big { grid-row: span 2; }
+.feat-img {
+  width:100%; height:100%; min-height: 200px;
+  background: linear-gradient(135deg, #1a1040, #0d2b3e);
+  position: relative; overflow: hidden;
+  display: flex; align-items: flex-end;
+}
+.feat-card.big .feat-img { min-height: 460px; }
+.feat-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+}
+.feat-img img {
+  position: absolute; inset: 0; width:100%;height:100%;object-fit:cover;
+  transition: transform 0.5s;
+}
+.feat-card:hover .feat-img img { transform: scale(1.06); }
+.feat-content {
+  position: relative; z-index: 2; padding: 20px 22px; width: 100%;
+}
+.feat-cat {
+  display: inline-block; padding: 4px 12px;
+  background: rgba(255,107,53,0.15); color: var(--accent);
+  border: 1px solid rgba(255,107,53,0.25);
+  border-radius: 30px; font-size: 10px; font-weight: 800;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+}
+.feat-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px;
+}
+.feat-card.big .feat-title { font-size: 26px; }
+.feat-meta { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 14px; }
+.feat-price {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 800;
+  background: linear-gradient(135deg, #ff6b35, #f72585);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.feat-btn {
+  display: inline-block; margin-top: 10px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #ff6b35, #f72585);
+  color: #fff; border: none; border-radius: 30px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+}
+.feat-btn:hover { transform: translateY(-2px); }
+
+/* ── CATEGORY ROW ── */
+.cat-section {
+  padding: 20px 24px 60px;
+  max-width: 1200px; margin: 0 auto;
+}
+.cat-cards-row {
+  display: flex; gap: 14px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px;
+}
+.cat-cards-row::-webkit-scrollbar { display: none; }
+.cat-big-pill {
+  flex-shrink: 0;
+  padding: 22px 28px; border-radius: 20px;
+  cursor: pointer; transition: all 0.3s;
+  border: 1.5px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  text-align: center; min-width: 120px;
+  text-decoration: none;
+}
+.cat-big-pill:hover { transform: translateY(-4px); border-color: var(--accent); background: rgba(255,107,53,0.06); }
+.cat-pill-icon { font-size: 28px; margin-bottom: 8px; }
+.cat-pill-label { font-size: 12px; font-weight: 700; color: var(--text2); }
+
+/* ── AI SECTION ── */
+.ai-section {
+  margin: 0 auto 60px;
+  max-width: 900px; padding: 0 24px;
+}
+.ai-card {
+  background: linear-gradient(135deg, #0a0d28 0%, #180a2a 100%);
+  border: 1px solid rgba(67,97,238,0.2);
+  border-radius: 28px; padding: 40px 36px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+.ai-card::before {
+  content:''; position:absolute; top:-80px; right:-80px;
+  width:260px; height:260px; border-radius:50%;
+  background: radial-gradient(circle, rgba(67,97,238,0.18) 0%, transparent 70%);
+  pointer-events:none;
+}
+.ai-card::after {
+  content:''; position:absolute; bottom:-60px; left:-60px;
+  width:200px; height:200px; border-radius:50%;
+  background: radial-gradient(circle, rgba(114,9,183,0.12) 0%, transparent 70%);
+  pointer-events:none;
+}
+.ai-badge {
+  display: inline-block; padding: 5px 16px;
+  background: rgba(67,97,238,0.15); border: 1px solid rgba(67,97,238,0.3);
+  border-radius: 30px; font-size: 11px; font-weight: 700; color: #7b91ff;
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;
+}
+.ai-card h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px; font-weight: 800; margin-bottom: 10px;
+}
+.ai-card p { color: var(--text3); font-size: 14px; margin-bottom: 24px; }
+.ai-input-wrap {
+  display: flex; gap: 10px; position: relative; z-index: 1;
+  max-width: 600px; margin: 0 auto;
+}
+.ai-input-wrap input {
+  flex: 1; background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(67,97,238,0.25);
+  border-radius: 16px; padding: 14px 20px;
+  color: var(--text); font-size: 14px; outline: none;
+  font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+}
+.ai-input-wrap input:focus { border-color: rgba(67,97,238,0.6); }
+.ai-input-wrap input::placeholder { color: var(--text3); }
+.ai-btn {
+  padding: 14px 26px;
+  background: linear-gradient(135deg, #4361ee, #7209b7);
+  color: #fff; border: none; border-radius: 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(67,97,238,0.35); transition: all 0.25s;
+  white-space: nowrap;
+}
+.ai-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(67,97,238,0.5); }
+.ai-response {
+  margin-top: 16px; padding: 18px 22px;
+  background: rgba(255,255,255,0.04); border-radius: 16px;
+  font-size: 14px; line-height: 1.8; color: var(--text2);
+  display: none; text-align: left;
+  border-left: 3px solid #4361ee;
+  position: relative; z-index: 1;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+<div id="starfield"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="bg-glow bg-glow-3"></div>
+
+<!-- WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-content">
+    <div class="welcome-logo">EventHub</div>
+    <div class="welcome-badge">✦ Vijayawada's #1 Platform ✦</div>
+    <h1>Discover Amazing<br/>Events Near You</h1>
+    <p>Concerts, festivals, tech talks &amp; more — all in one place</p>
+    <div class="welcome-btns">
+      <button class="btn-started" onclick="getStarted()">Get Started →</button>
+      <button class="btn-guest" onclick="continueAsGuest()">Browse as Guest</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal-box">
+    <div class="modal-icon">🎟️</div>
+    <h2>Confirm Booking</h2>
+    <div class="modal-event-info" id="modalEventInfo"></div>
+    <div class="modal-price" id="modalPrice"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="confirmBooking()">Confirm & Book</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <div style="font-size:60px;margin-bottom:12px;">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <div class="ticket-card" id="ticketPreview"></div>
+    <button class="btn-confirm" onclick="closeSuccess()">Done</button>
+  </div>
+</div>
+<div class="modal-overlay" id="favsPanel">
+  <div class="modal-box" style="max-width:560px;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2>❤️ My Favourites</h2>
+      <button onclick="closeFavs()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+    </div>
+    <div id="favsContent"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="notifPanel">
+  <div class="modal-box" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2>🔔 Notifications</h2>
+      <button onclick="closeNotif()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+    </div>
+    <div id="notifContent"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="ticketsPanel">
+  <div class="modal-box" style="max-width:560px;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2>🎟️ My Tickets</h2>
+      <button onclick="closeTickets()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+    </div>
+    <div id="ticketsContent"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="profilePanel">
+  <div class="modal-box" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2>👤 My Account</h2>
+      <button onclick="closeProfile()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+    </div>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="main-header">
+  <div class="header-left">
+    <div class="logo-text">EventHub</div>
+    <div class="location-block">
+      <span>📍</span>
+      <div>
+        <div class="loc-label">Location</div>
+        <div class="loc-city">Vijayawada, AP ▾</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn notif-wrap" onclick="openNotif()" title="Notifications">
+      🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
+    </button>
+    <button class="icon-btn fav-wrap" onclick="openFavs()" title="Favourites">
+      🤍<span class="fav-badge" id="favBadge" style="display:none">0</span>
+    </button>
+    <div id="authBtn"></div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-float-cards">
+    <div class="float-card fc1"><strong>Jazz After Dark</strong>📅 May 28 · ₹350</div>
+    <div class="float-card fc2"><strong>TechFest 2026</strong>📅 Jun 20 · ₹299</div>
+    <div class="float-card fc3"><strong>Food & Culture Fest</strong>📅 Jun 5 · ₹150</div>
+  </div>
+  <div class="hero-eyebrow"><span></span>12 Events This Month</div>
+  <h1 class="hero-title">
+    <span class="line1">Vijayawada's Biggest</span>
+    <span class="line2">Event Platform</span>
+  </h1>
+  <p class="hero-sub">Concerts, tech talks, food festivals & sports — book your next unforgettable experience in seconds.</p>
+  <div class="hero-cta">
+    <a href="events.html" class="cta-primary">Explore Events →</a>
+    <a href="login.html" class="cta-secondary">Create Account</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-num">12+</div>
+    <div class="stat-lbl">Live Events</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">8</div>
+    <div class="stat-lbl">Categories</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">3K+</div>
+    <div class="stat-lbl">Tickets Sold</div>
+  </div>
+</div>
+
+<!-- FEATURED EVENTS -->
+<div class="featured-sec">
+  <div class="sec-label"><div class="dot"></div><span>Featured</span></div>
+  <h2 class="sec-title">Don't Miss These 🔥</h2>
+  <div class="featured-grid" id="featuredGrid"></div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="cat-section">
+  <div class="sec-label"><div class="dot"></div><span>Browse By</span></div>
+  <h2 class="sec-title">Pick Your Vibe</h2>
+  <div class="cat-cards-row">
+    <a href="events.html?cat=music" class="cat-big-pill"><div class="cat-pill-icon">🎵</div><div class="cat-pill-label">Music</div></a>
+    <a href="events.html?cat=jazz" class="cat-big-pill"><div class="cat-pill-icon">🎷</div><div class="cat-pill-label">Jazz</div></a>
+    <a href="events.html?cat=hiphop" class="cat-big-pill"><div class="cat-pill-icon">🎤</div><div class="cat-pill-label">Hip-Hop</div></a>
+    <a href="events.html?cat=classical" class="cat-big-pill"><div class="cat-pill-icon">🎻</div><div class="cat-pill-label">Classical</div></a>
+    <a href="events.html?cat=tech" class="cat-big-pill"><div class="cat-pill-icon">💻</div><div class="cat-pill-label">Tech</div></a>
+    <a href="events.html?cat=food" class="cat-big-pill"><div class="cat-pill-icon">🍕</div><div class="cat-pill-label">Food</div></a>
+    <a href="events.html?cat=sports" class="cat-big-pill"><div class="cat-pill-icon">⚽</div><div class="cat-pill-label">Sports</div></a>
+  </div>
+</div>
+
+<!-- AI ASSISTANT -->
+<div class="ai-section">
+  <div class="ai-card">
+    <div class="ai-badge">✨ Powered by AI</div>
+    <h2>Your Personal Event Curator</h2>
+    <p>Ask anything about events happening in Vijayawada</p>
+    <div class="ai-input-wrap">
+      <input type="text" id="ai-input" placeholder="Best events for families this weekend..." onkeydown="if(event.key==='Enter')getAISuggestion()"/>
+      <button class="ai-btn" onclick="getAISuggestion()">Ask AI</button>
+    </div>
+    <div id="ai-response" class="ai-response"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bnav active" onclick="window.location.href='index.html'">
+    <span class="bicon">🏠</span><span class="blabel">Home</span>
+  </button>
+  <button class="bnav" onclick="window.location.href='events.html'">
+    <span class="bicon">🎪</span><span class="blabel">Events</span>
+  </button>
+  <button class="bnav" onclick="openFavs()">
+    <span class="bicon" style="position:relative;">🤍<span class="bnav-badge" id="bnavFavBadge" style="display:none"></span></span>
+    <span class="blabel">Favourites</span>
+  </button>
+  <button class="bnav" onclick="openTickets()">
+    <span class="bicon">🎟️</span><span class="blabel">Tickets</span>
+  </button>
+  <button class="bnav" onclick="goToProfile()">
+    <div class="bnav-avatar" id="bnavAvatar">👤</div>
+    <span class="blabel">Profile</span>
+  </button>
+</nav>
+
+<div style="height:80px"></div>
+<script src="script.js"></script>
+<script>
+(function(){
+  const sf=document.getElementById("starfield");
+  if(!sf)return;
+  for(let i=0;i<80;i++){
+    const s=document.createElement("div");s.className="star-dot";
+    const size=Math.random()*2+0.5;
+    s.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;--lo:${(Math.random()*0.2+0.05).toFixed(2)};opacity:${(Math.random()*0.2+0.05).toFixed(2)};`;
+    sf.appendChild(s);
+  }
+})();
+
+function renderFeatured() {
+  const grid = document.getElementById('featuredGrid');
+  if (!grid) return;
+  const featured = ALL_EVENTS.slice(0, 3);
+  grid.innerHTML = featured.map((ev, i) => `
+    <div class="feat-card ${i===0?'big':''}" onclick="openBooking(${ev.id})">
+      <div class="feat-img">
+        <img src="${ev.image}" alt="${ev.title}" onerror="this.style.display='none'"/>
+        <div class="feat-img-overlay"></div>
+        <div class="feat-content">
+          <div class="feat-cat">${ev.category}</div>
+          <div class="feat-title">${ev.title}</div>
+          <div class="feat-meta">📅 ${ev.date} &nbsp;|&nbsp; 📍 ${ev.location.split(',')[0]}</div>
+          <div class="feat-price">₹${ev.price}</div>
+          ${i===0 ? `<button class="feat-btn">Book Now →</button>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function getAISuggestion() {
+  const input = document.getElementById('ai-input').value.trim();
+  const box = document.getElementById('ai-response');
+  if (!input) return;
+  box.textContent = '⏳ Thinking...';
+  box.style.display = 'block';
+  try {
+    const res = await fetch('http://127.0.0.1:5000/ask-grok', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ message: input })
+    });
+    const data = await res.json();
+    box.textContent = data.reply;
+  } catch {
+    box.textContent = '⚠️ Start Flask to enable AI: python backend/main.py';
+  }
+}
+
+window.onload = function() {
+  checkWelcome();
+  updateAuthUI();
+  updateBadges();
+  renderFeatured();
+};
+</script>
+</body>
+</html>

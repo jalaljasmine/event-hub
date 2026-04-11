@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EventHub | My Tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+.page-wrap { max-width: 640px; margin: 0 auto; padding: 90px 20px 100px; }
+.page-hero { margin-bottom: 28px; }
+.page-hero h1 { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; margin-bottom:6px; }
+.page-hero p  { color:var(--text3); font-size:14px; }
+
+/* TICKET CARD */
+.tkt-card {
+  background: linear-gradient(160deg, var(--surface), var(--surface2));
+  border: 1px solid var(--border2);
+  border-radius: 22px; overflow: hidden;
+  margin-bottom: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.tkt-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+
+/* PERFORATED LINE */
+.tkt-perforation {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  position: relative;
+}
+.tkt-perforation::before {
+  content:''; position:absolute; left:0; right:0; top:50%;
+  border-top: 2px dashed rgba(255,255,255,0.08);
+}
+.perf-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--bg); flex-shrink: 0; z-index: 1;
+}
+.perf-circle.left  { margin-left: -10px; }
+.perf-circle.right { margin-left: auto; margin-right: -10px; }
+
+.tkt-top { padding: 20px 22px 16px; }
+.tkt-bottom { padding: 14px 22px 20px; }
+
+.tkt-category {
+  display: inline-block; padding: 4px 12px;
+  background: rgba(255,107,53,0.1); color: var(--accent);
+  border: 1px solid rgba(255,107,53,0.22);
+  border-radius: 30px; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px;
+}
+.tkt-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; margin-bottom:10px; }
+.tkt-meta  { font-size:13px; color:var(--text3); line-height:2; }
+.tkt-meta span { color:var(--text2); font-weight:500; }
+
+.tkt-id-row {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap:wrap; gap:10px;
+}
+.tkt-id {
+  font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
+  background: linear-gradient(135deg,#ff6b35,#f72585);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  letter-spacing: 2px;
+}
+.tkt-qr img { width:70px; height:70px; border-radius:10px; }
+.tkt-seat {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(0,201,167,0.1); border:1px solid rgba(0,201,167,0.2);
+  padding:5px 12px; border-radius:20px;
+  font-size:12px; font-weight:700; color:#00c9a7;
+}
+.tkt-paid {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(6,214,160,0.1); border:1px solid rgba(6,214,160,0.2);
+  padding:5px 12px; border-radius:20px;
+  font-size:12px; font-weight:700; color:#06d6a0;
+}
+
+/* ACCENT LINE */
+.tkt-accent-bar {
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b35, #f72585, #7b61ff);
+}
+
+/* EMPTY */
+.empty-tickets {
+  text-align: center; padding: 80px 20px;
+}
+.empty-tickets .big-icon { font-size: 64px; margin-bottom: 16px; }
+.empty-tickets h2 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:8px; }
+.empty-tickets p  { color:var(--text3); font-size:14px; margin-bottom:28px; }
+.btn-explore {
+  display:inline-block; padding:14px 36px;
+  background:linear-gradient(135deg,#ff6b35,#f72585);
+  color:#fff; border-radius:50px;
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+  text-decoration:none; transition:all 0.2s;
+  box-shadow:0 8px 28px rgba(255,107,53,0.35);
+}
+.btn-explore:hover { transform:translateY(-2px); }
+</style>
+</head>
+<body>
+<div id="starfield"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<header class="main-header">
+  <div class="header-left">
+    <a href="index.html" class="logo-text" style="text-decoration:none">EventHub</a>
+  </div>
+  <div class="header-right"><div id="authBtn"></div></div>
+</header>
+
+<div class="page-wrap">
+  <div class="page-hero">
+    <h1>🎟️ My Tickets</h1>
+    <p id="ticketCount">Loading...</p>
+  </div>
+  <div id="ticketsList"></div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bnav" onclick="location.href='index.html'"><span class="bicon">🏠</span><span class="blabel">Home</span></button>
+  <button class="bnav" onclick="location.href='events.html'"><span class="bicon">🎪</span><span class="blabel">Events</span></button>
+  <button class="bnav" onclick="location.href='favourites.html'"><span class="bicon">🤍</span><span class="blabel">Favourites</span></button>
+  <button class="bnav active" onclick="location.href='tickets.html'"><span class="bicon">🎟️</span><span class="blabel">Tickets</span></button>
+  <button class="bnav" onclick="location.href='profile.html'"><div class="bnav-avatar" id="bnavAvatar">👤</div><span class="blabel">Profile</span></button>
+</nav>
+
+<script src="script.js"></script>
+<script>
+(function(){const sf=document.getElementById("starfield");if(!sf)return;for(let i=0;i<50;i++){const s=document.createElement("div");s.className="star-dot";const z=Math.random()*1.5+0.5;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;--lo:${(Math.random()*0.12+0.03).toFixed(2)};opacity:${(Math.random()*0.12+0.03).toFixed(2)};`;sf.appendChild(s);}})();
+
+function render() {
+  const user = getUser();
+  const list = document.getElementById('ticketsList');
+  const count = document.getElementById('ticketCount');
+
+  if (!user) {
+    list.innerHTML = `<div class="empty-tickets"><div class="big-icon">🔐</div><h2>Please Login</h2><p>Sign in to view your tickets</p><a href="login.html" class="btn-explore">Login →</a></div>`;
+    count.textContent = '';
+    return;
+  }
+
+  const tickets = getTickets();
+  count.textContent = `${tickets.length} booking${tickets.length!==1?'s':''} found`;
+
+  if (!tickets.length) {
+    list.innerHTML = `<div class="empty-tickets"><div class="big-icon">🎟️</div><h2>No Tickets Yet</h2><p>Book your first event and your tickets will appear here</p><a href="events.html" class="btn-explore">Explore Events →</a></div>`;
+    return;
+  }
+
+  const catEmoji = {music:'🎵',jazz:'🎷',hiphop:'🎤',classical:'🎻',tech:'💻',food:'🍕',sports:'⚽'};
+
+  list.innerHTML = tickets.map(t => `
+    <div class="tkt-card">
+      <div class="tkt-accent-bar"></div>
+      <div class="tkt-top">
+        <div class="tkt-category">${catEmoji[t.category]||'🎪'} ${(t.category||'Event').toUpperCase()}</div>
+        <div class="tkt-title">${t.title}</div>
+        <div class="tkt-meta">
+          📅 <span>${t.date} · ${t.time}</span><br/>
+          📍 <span>${t.location}</span><br/>
+          💰 <span>₹${t.price}</span>
+        </div>
+      </div>
+      <div class="tkt-perforation">
+        <div class="perf-circle left"></div>
+        <div class="perf-circle right"></div>
+      </div>
+      <div class="tkt-bottom">
+        <div class="tkt-id-row">
+          <div>
+            <div class="tkt-id">${t.ticketId}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px;">Show this at entry</div>
+          </div>
+          <div style="text-align:right;">
+            ${t.seatNum ? `<div class="tkt-seat">🪑 ${t.seatNum}</div><br/>` : ''}
+            <div class="tkt-paid" style="margin-top:6px;">✓ Confirmed</div>
+          </div>
+        </div>
+        ${t.paymentId ? `<div style="font-size:11px;color:var(--text3);margin-top:10px;">Payment ID: ${t.paymentId}</div>` : ''}
+        ${t.bookedOn ? `<div style="font-size:11px;color:var(--text3);">Booked on: ${t.bookedOn}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  // update bottom nav avatar
+  const initials = ((user.firstName||'')[0]||(user.email[0]||'U')).toUpperCase();
+  const av = document.getElementById('bnavAvatar');
+  if(av){av.textContent=initials;av.style.background='linear-gradient(135deg,#7b61ff,#00c9a7)';}
+}
+
+window.onload = function() { updateAuthUI(); render(); };
+</script>
+</body>
+</html>

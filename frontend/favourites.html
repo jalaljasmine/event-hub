@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EventHub | Favourites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+.page-wrap { max-width: 640px; margin: 0 auto; padding: 90px 20px 100px; }
+.page-hero { margin-bottom: 28px; }
+.page-hero h1 { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; margin-bottom:6px; }
+.page-hero p  { color:var(--text3); font-size:14px; }
+
+.fav-card {
+  display:flex; gap:16px;
+  background: var(--surface); border:1px solid var(--border2);
+  border-radius: 20px; overflow:hidden;
+  margin-bottom: 14px; transition: all 0.25s;
+  position: relative;
+}
+.fav-card:hover { border-color:rgba(255,107,53,0.3); transform:translateY(-3px); box-shadow:0 16px 50px rgba(0,0,0,0.4); }
+.fav-card-img {
+  width: 110px; flex-shrink:0;
+  background: linear-gradient(135deg,#1a1040,#0d2b3e);
+  position:relative;
+}
+.fav-card-img img { width:100%; height:100%; object-fit:cover; }
+.fav-card-body { flex:1; padding:16px 16px 16px 0; }
+.fav-cat {
+  display:inline-block; padding:3px 10px;
+  background:rgba(255,107,53,0.1); color:var(--accent);
+  border:1px solid rgba(255,107,53,0.2);
+  border-radius:20px; font-size:10px; font-weight:800;
+  letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;
+}
+.fav-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; margin-bottom:6px; line-height:1.3; }
+.fav-meta  { font-size:12px; color:var(--text3); margin-bottom:3px; }
+.fav-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.fav-price {
+  font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
+  background:linear-gradient(135deg,#ff6b35,#f72585);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.fav-actions { display:flex; gap:8px; }
+.btn-fav-book {
+  padding:8px 18px;
+  background:linear-gradient(135deg,#ff6b35,#f72585);
+  color:#fff; border:none; border-radius:20px;
+  font-size:12px; font-weight:700; cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-fav-book:hover { transform:translateY(-2px); }
+.btn-fav-remove {
+  width:34px; height:34px; border-radius:10px;
+  background:rgba(255,71,87,0.1); border:1px solid rgba(255,71,87,0.2);
+  color:#ff4757; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.btn-fav-remove:hover { background:rgba(255,71,87,0.2); }
+
+.empty-favs { text-align:center; padding:80px 20px; }
+.empty-favs .big-icon { font-size:64px; margin-bottom:16px; }
+.empty-favs h2 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; margin-bottom:8px; }
+.empty-favs p  { color:var(--text3); font-size:14px; margin-bottom:28px; }
+.btn-explore {
+  display:inline-block; padding:14px 36px;
+  background:linear-gradient(135deg,#ff6b35,#f72585);
+  color:#fff; border-radius:50px;
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+  text-decoration:none; transition:all 0.2s;
+  box-shadow:0 8px 28px rgba(255,107,53,0.35);
+}
+.btn-explore:hover { transform:translateY(-2px); }
+</style>
+</head>
+<body>
+<div id="starfield"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- BOOKING MODALS (reused from script.js) -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal-box">
+    <div class="modal-icon">🎟️</div>
+    <h2>Confirm Booking</h2>
+    <div class="modal-event-info" id="modalEventInfo"></div>
+    <div class="modal-price" id="modalPrice"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="confirmBooking()">Confirm & Book</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <div style="font-size:60px;margin-bottom:12px;">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <div class="ticket-card" id="ticketPreview"></div>
+    <button class="btn-confirm" onclick="closeSuccess()">Done</button>
+  </div>
+</div>
+
+<header class="main-header">
+  <div class="header-left">
+    <a href="index.html" class="logo-text" style="text-decoration:none">EventHub</a>
+  </div>
+  <div class="header-right"><div id="authBtn"></div></div>
+</header>
+
+<div class="page-wrap">
+  <div class="page-hero">
+    <h1>❤️ Favourites</h1>
+    <p id="favCount">Loading...</p>
+  </div>
+  <div id="favList"></div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bnav" onclick="location.href='index.html'"><span class="bicon">🏠</span><span class="blabel">Home</span></button>
+  <button class="bnav" onclick="location.href='events.html'"><span class="bicon">🎪</span><span class="blabel">Events</span></button>
+  <button class="bnav active" onclick="location.href='favourites.html'"><span class="bicon">❤️</span><span class="blabel">Favourites</span></button>
+  <button class="bnav" onclick="location.href='tickets.html'"><span class="bicon">🎟️</span><span class="blabel">Tickets</span></button>
+  <button class="bnav" onclick="location.href='profile.html'"><div class="bnav-avatar" id="bnavAvatar">👤</div><span class="blabel">Profile</span></button>
+</nav>
+
+<script src="script.js"></script>
+<script>
+(function(){const sf=document.getElementById("starfield");if(!sf)return;for(let i=0;i<50;i++){const s=document.createElement("div");s.className="star-dot";const z=Math.random()*1.5+0.5;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;--lo:${(Math.random()*0.12+0.03).toFixed(2)};opacity:${(Math.random()*0.12+0.03).toFixed(2)};`;sf.appendChild(s);}})();
+
+function render() {
+  const favIds = getFavs();
+  const count = document.getElementById('favCount');
+  const list = document.getElementById('favList');
+  const catEmoji = {music:'🎵',jazz:'🎷',hiphop:'🎤',classical:'🎻',tech:'💻',food:'🍕',sports:'⚽'};
+
+  count.textContent = `${favIds.length} saved event${favIds.length!==1?'s':''}`;
+
+  if (!favIds.length) {
+    list.innerHTML = `<div class="empty-favs"><div class="big-icon">🤍</div><h2>No Favourites Yet</h2><p>Tap the heart on any event to save it here</p><a href="events.html" class="btn-explore">Browse Events →</a></div>`;
+    return;
+  }
+
+  const events = ALL_EVENTS.filter(e => favIds.includes(e.id));
+  list.innerHTML = events.map(ev => `
+    <div class="fav-card">
+      <div class="fav-card-img">
+        <img src="${ev.image}" alt="${ev.title}" onerror="this.style.display='none'"/>
+      </div>
+      <div class="fav-card-body">
+        <div class="fav-cat">${catEmoji[ev.category]||'🎪'} ${ev.category}</div>
+        <div class="fav-title">${ev.title}</div>
+        <div class="fav-meta">📅 ${ev.date} · ${ev.time}</div>
+        <div class="fav-meta">📍 ${ev.location.split(',')[0]}</div>
+        <div class="fav-footer">
+          <div class="fav-price">₹${ev.price}</div>
+          <div class="fav-actions">
+            <button class="btn-fav-remove" onclick="removeFav(${ev.id})" title="Remove">🗑️</button>
+            <button class="btn-fav-book" onclick="openBooking(${ev.id})">Book →</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function removeFav(id) {
+  const favs = getFavs().filter(f => f !== id);
+  saveFavs(favs);
+  render();
+}
+
+// override closeSuccess to re-render
+const _origCloseSuccess = window.closeSuccess;
+window.closeSuccess = function() { if(_origCloseSuccess) _origCloseSuccess(); render(); };
+
+window.onload = function() { updateAuthUI(); render(); };
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+# ─── Python ─────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# ─── Flask ─────────────────────────────
+instance/
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+
+# ─── Logs ─────────────────────────────
+*.log
+
+# ─── VS Code ──────────────────────────
+.vscode/
+
+# ─── OS Files ─────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Node (if used later) ─────────────
+node_modules/
+dist/
+build/
+
+# ─── Temporary Files ──────────────────
+*.tmp
+*.temp
+
+# ─── Coverage / Testing ───────────────
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ─── Misc ─────────────────────────────
+*.bak
+*.swp
+
+# ─── Your Project Specific ────────────
+backend/db.json   # optional (remove if you WANT to track data)

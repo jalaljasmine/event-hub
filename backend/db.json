@@ -1,0 +1,251 @@
+{
+  "users": [
+    {
+      "id": "062050d1-d3b9-42f2-88df-8aefc2d5f4cf",
+      "firstName": "jalal shaik",
+      "lastName": "Jasmine",
+      "email": "jalalshaikjasmine@gmail.com",
+      "institution": "SRM UNIVERSITY",
+      "password": "Jalal2005",
+      "role": "attendee",
+      "createdAt": "2026-04-09T21:15:18.137493"
+    },
+    {
+      "id": "c5d8c227-ba8f-4765-b5b8-be9a9b3f3d3e",
+      "firstName": "Jalal Shaik",
+      "lastName": "Jasmine",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "institution": "Vijayawada",
+      "password": "12345678",
+      "role": "attendee",
+      "createdAt": "2026-04-10T14:04:49.277510"
+    },
+    {
+      "id": "0508b128-ec49-43f0-83f1-f5faa8da7f27",
+      "firstName": "Jyothika",
+      "lastName": "Nallana",
+      "email": "nallanajyothikagowthami@gmail.com",
+      "institution": "nallanajyothikagowthami@gmail.com",
+      "password": "12345678",
+      "role": "attendee",
+      "createdAt": "2026-04-10T14:13:12.008275"
+    },
+    {
+      "id": "f9d2f328-ee54-41ad-b005-4e9760135b31",
+      "firstName": "Jyothika",
+      "lastName": "Nallana",
+      "email": "nallanajythikagowtami@gmail.com",
+      "institution": "SRM UNIVERSITY",
+      "password": "87654321",
+      "role": "attendee",
+      "createdAt": "2026-04-10T14:19:21.660540"
+    },
+    {
+      "id": "08d7d634-1983-479a-931a-b8242c85af7c",
+      "firstName": "shaik",
+      "lastName": "Ashifa",
+      "email": "shaikashifa@gmail.com",
+      "institution": "Vijayawada",
+      "password": "666666",
+      "role": "attendee",
+      "createdAt": "2026-04-11T12:51:22.085245"
+    }
+  ],
+  "tickets": [
+    {
+      "ticketId": "TKTA848C8",
+      "email": "jalalshaikjasmine@gmail.com",
+      "eventId": 3,
+      "title": "Jazz After Dark",
+      "date": "May 28, 2026",
+      "time": "8:00 PM",
+      "location": "PWD Grounds, Vijayawada",
+      "price": 350,
+      "bookedOn": "2026-04-09T21:44:55.835881"
+    },
+    {
+      "ticketId": "TKT9AEAA0",
+      "email": "jalalshaikjasmine@gmail.com",
+      "eventId": 10,
+      "title": "Classical Fusion Night",
+      "date": "Jun 25, 2026",
+      "time": "7:00 PM",
+      "location": "Punnami Ghat Grounds, Vijayawada",
+      "price": 600,
+      "bookedOn": "2026-04-09T21:56:41.028669"
+    },
+    {
+      "ticketId": "TKTABF9B9",
+      "email": "jalalshaikjasmine@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour",
+      "date": "Jul 1, 2026",
+      "time": "7:00 PM",
+      "location": "IGMC Stadium, Vijayawada",
+      "price": 899,
+      "bookedOn": "2026-04-09T21:57:01.044626"
+    },
+    {
+      "ticketId": "TKTDA5B6C",
+      "email": "jalalshaikjasmine@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour",
+      "date": "Jul 1, 2026",
+      "time": "7:00 PM",
+      "location": "IGMC Stadium, Vijayawada",
+      "price": 899,
+      "bookedOn": "2026-04-09T21:58:31.436555"
+    },
+    {
+      "ticketId": "TKTBAAA64",
+      "email": "jalalshaikjasmine@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour",
+      "date": "Jul 1, 2026",
+      "time": "7:00 PM",
+      "location": "IGMC Stadium, Vijayawada",
+      "price": 899,
+      "bookedOn": "2026-04-10T13:50:55.208680"
+    },
+    {
+      "ticketId": "TKT1D3895",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 6,
+      "title": "Food & Culture Fest",
+      "date": "Jun 5, 2026",
+      "time": "11:00 AM",
+      "location": "Rajiv Gandhi Park, Vijayawada",
+      "price": 150,
+      "bookedOn": "2026-04-10T14:20:02.999533"
+    },
+    {
+      "ticketId": "TKT451D81",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "eventId": 3,
+      "title": "Jazz After Dark",
+      "date": "May 28, 2026",
+      "time": "8:00 PM",
+      "location": "PWD Grounds, Vijayawada",
+      "price": 350,
+      "bookedOn": "2026-04-10T14:40:29.742278"
+    },
+    {
+      "ticketId": "TKT79D772",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "eventId": 3,
+      "title": "Jazz After Dark",
+      "date": "May 28, 2026",
+      "time": "8:00 PM",
+      "location": "PWD Grounds, Vijayawada",
+      "price": 350,
+      "bookedOn": "2026-04-10T18:50:24.610457"
+    },
+    {
+      "ticketId": "TKT29574C",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour"
+    },
+    {
+      "ticketId": "TKT9CDF26",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 12,
+      "title": "Dance Mania Championship"
+    },
+    {
+      "ticketId": "TKT54DBFB",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 3,
+      "title": "Jazz After Dark"
+    },
+    {
+      "ticketId": "TKT525FA2",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour"
+    },
+    {
+      "ticketId": "TKTC717AD",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 3,
+      "title": "Jazz After Dark"
+    },
+    {
+      "ticketId": "TKTD6523B",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 3,
+      "title": "Jazz After Dark"
+    },
+    {
+      "ticketId": "TKT92BDC2",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour"
+    },
+    {
+      "ticketId": "TKTDA542E",
+      "email": "nallanajythikagowtami@gmail.com",
+      "eventId": 4,
+      "title": "Hip-Hop Nation Tour",
+      "date": "Jul 1, 2026",
+      "time": "7:00 PM",
+      "location": "IGMC Stadium, Vijayawada",
+      "price": 899,
+      "bookedOn": "2026-04-11T00:27:43.943874"
+    },
+    {
+      "ticketId": "TKT151E84",
+      "email": "shaikashifa@gmail.com",
+      "eventId": null,
+      "title": "Jazz After Dark",
+      "date": "May 28, 2026",
+      "time": "8:00 PM",
+      "location": "PWD Grounds, Vijayawada",
+      "price": 350,
+      "paymentId": "PAY92307374",
+      "seatNum": "S38",
+      "bookedOn": "2026-04-11T12:55:07.387545"
+    },
+    {
+      "ticketId": "TKT0E6868",
+      "email": "shaikashifa@gmail.com",
+      "eventId": null,
+      "title": "Hip-Hop Nation Tour",
+      "date": "Jul 1, 2026",
+      "time": "7:00 PM",
+      "location": "IGMC Stadium, Vijayawada",
+      "price": 899,
+      "paymentId": "PAY97862989",
+      "seatNum": "S419",
+      "bookedOn": "2026-04-11T14:27:43.027791"
+    },
+    {
+      "ticketId": "TKT3B7886",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "eventId": null,
+      "title": "Symphony of Sound",
+      "date": "Jun 10, 2026",
+      "time": "7:30 PM",
+      "location": "Tummalapalli Kalakshetram, Vijayawada",
+      "price": 750,
+      "paymentId": "PAY13089263",
+      "seatNum": "S55",
+      "bookedOn": "2026-04-11T18:41:29.270818"
+    },
+    {
+      "ticketId": "TKT1F5DD5",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "eventId": null,
+      "title": "National Music Festival",
+      "date": "May 30, 2026",
+      "time": "6:00 PM",
+      "location": "Siddhartha Amphitheatre, Vijayawada",
+      "price": 499,
+      "paymentId": "PAY28766540",
+      "seatNum": "S46",
+      "bookedOn": "2026-04-11T23:02:46.606862"
+    }
+  ],
+  "events": [],
+  "reviews": {}
+}

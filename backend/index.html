@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EventHub | Book Events in Vijayawada</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- STARFIELD & AMBIENT -->
+<div id="starfield"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="bg-glow bg-glow-3"></div>
+
+<!-- WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-content">
+        <div class="welcome-logo">EventHub</div>
+        <div class="welcome-badge">✦ Vijayawada's #1 Platform ✦</div>
+        <h1>Discover Amazing<br/>Events Near You</h1>
+        <p>Concerts, festivals, tech talks &amp; more —<br/>all in one place</p>
+        <div class="welcome-btns">
+            <button class="btn-started" onclick="getStarted()">Get Started →</button>
+            <button class="btn-guest" onclick="continueAsGuest()">Browse as Guest</button>
+        </div>
+    </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+    <div class="modal-box">
+        <div class="modal-icon">🎟️</div>
+        <h2>Confirm Booking</h2>
+        <div class="modal-event-info" id="modalEventInfo"></div>
+        <div class="modal-price" id="modalPrice"></div>
+        <div class="modal-actions">
+            <button class="btn-confirm" onclick="confirmBooking()">Confirm & Book</button>
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+        <div style="font-size:60px;margin-bottom:12px;">✅</div>
+        <h2>Booking Confirmed!</h2>
+        <div class="ticket-card" id="ticketPreview"></div>
+        <button class="btn-confirm" onclick="closeSuccess()">Done</button>
+    </div>
+</div>
+
+<!-- FAVOURITES PANEL -->
+<div class="modal-overlay" id="favsPanel">
+    <div class="modal-box" style="max-width:560px;max-height:80vh;overflow-y:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2>❤️ My Favourites</h2>
+            <button onclick="closeFavs()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+        </div>
+        <div id="favsContent"></div>
+    </div>
+</div>
+
+<!-- NOTIFICATIONS PANEL -->
+<div class="modal-overlay" id="notifPanel">
+    <div class="modal-box" style="max-width:420px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2>🔔 Notifications</h2>
+            <button onclick="closeNotif()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+        </div>
+        <div id="notifContent"></div>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="main-header">
+    <div class="header-left">
+        <div class="logo-text">EventHub</div>
+        <div class="location-block">
+            <span>📍</span>
+            <div>
+                <div class="loc-label">Location</div>
+                <div class="loc-city">Vijayawada, AP ▾</div>
+            </div>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="icon-btn notif-wrap" onclick="openNotif()" title="Notifications">
+            🔔
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        </button>
+        <button class="icon-btn fav-wrap" onclick="openFavs()" title="Favourites">
+            🤍
+            <span class="fav-badge" id="favBadge" style="display:none">0</span>
+        </button>
+        <div id="authBtn"></div>
+    </div>
+</header>
+
+<!-- SEARCH -->
+<div class="search-section">
+    <div class="search-bar">
+        <span class="s-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search events, organizers..." oninput="liveSearch(this.value)"/>
+    </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="cat-bar">
+    <button class="cat-pill active" onclick="filterCat('all',this)">All</button>
+    <button class="cat-pill" onclick="filterCat('music',this)">🎵 Music</button>
+    <button class="cat-pill" onclick="filterCat('jazz',this)">🎷 Jazz</button>
+    <button class="cat-pill" onclick="filterCat('hiphop',this)">🎤 Hip-Hop</button>
+    <button class="cat-pill" onclick="filterCat('classical',this)">🎻 Classical</button>
+    <button class="cat-pill" onclick="filterCat('tech',this)">💻 Tech</button>
+    <button class="cat-pill" onclick="filterCat('food',this)">🍕 Food</button>
+    <button class="cat-pill" onclick="filterCat('sports',this)">⚽ Sports</button>
+</div>
+
+<!-- UPCOMING EVENTS -->
+<section class="sec">
+    <div class="sec-header">
+        <h2>Upcoming Events</h2>
+        <button class="see-all-btn" id="seeAllBtn" onclick="toggleSeeAll()">See All</button>
+    </div>
+    <div class="events-h-scroll" id="upcomingRow"></div>
+    <div class="events-full-grid hidden" id="allEventsGrid"></div>
+</section>
+
+<!-- TOP CONCERTS -->
+<section class="sec">
+    <div class="sec-header">
+        <h2>Top Concerts</h2>
+        <button class="see-all-btn" onclick="toggleSeeAll()">See All</button>
+    </div>
+    <div class="concerts-list" id="concertsList"></div>
+</section>
+
+<!-- AI ASSISTANT -->
+<section class="ai-wrap">
+    <h2>✨ AI Event Assistant</h2>
+    <p class="ai-sub">Get personalised event ideas for Vijayawada</p>
+    <div class="ai-input-row">
+        <input type="text" id="ai-input" placeholder="e.g. Best events for families this weekend..." onkeydown="if(event.key==='Enter')getAISuggestion()"/>
+        <button onclick="getAISuggestion()">Ask AI</button>
+    </div>
+    <div id="ai-response" class="ai-resp"></div>
+</section>
+
+<!-- TICKETS PANEL -->
+<div class="modal-overlay" id="ticketsPanel">
+    <div class="modal-box" style="max-width:560px;max-height:80vh;overflow-y:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2>🎟️ My Tickets</h2>
+            <button onclick="closeTickets()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+        </div>
+        <div id="ticketsContent"></div>
+    </div>
+</div>
+
+<!-- PROFILE PANEL -->
+<div class="modal-overlay" id="profilePanel">
+    <div class="modal-box" style="max-width:420px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2>👤 My Account</h2>
+            <button onclick="closeProfile()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;">✕</button>
+        </div>
+        <div id="profileContent"></div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <button class="bnav active" onclick="window.location.href='/'">
+        <span class="bicon">🏠</span><span class="blabel">Home</span>
+    </button>
+    <button class="bnav" onclick="openFavs()">
+        <span class="bicon" style="position:relative;">🤍<span class="bnav-badge" id="bnavFavBadge" style="display:none"></span></span>
+        <span class="blabel">Favourites</span>
+    </button>
+    <button class="bnav" onclick="openTickets()">
+        <span class="bicon">🎟️</span><span class="blabel">Tickets</span>
+    </button>
+    <button class="bnav" onclick="goToProfile()">
+        <div class="bnav-avatar" id="bnavAvatar">👤</div>
+        <span class="blabel">Profile</span>
+    </button>
+</nav>
+
+<div style="height:80px"></div>
+<script src="script.js"></script>
+<script>
+// Starfield
+(function(){
+  const sf = document.getElementById("starfield");
+  if(!sf) return;
+  for(let i=0;i<80;i++){
+    const s=document.createElement("div");
+    s.className="star-dot";
+    const size = Math.random()*2+0.5;
+    s.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;--lo:${(Math.random()*0.2+0.05).toFixed(2)};opacity:${(Math.random()*0.2+0.05).toFixed(2)};`;
+    sf.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
