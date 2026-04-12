@@ -382,7 +382,15 @@
       <span>📍</span>
       <div>
         <div class="loc-label">Location</div>
-        <div class="loc-city">Vijayawada, AP ▾</div>
+        <div class="loc-city">
+          <select style="background:transparent; color:#fff; border:none; outline:none; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;-webkit-appearance:none;appearance:none;padding-right:10px;" onchange="if(this.value!=='') window.location.href='events.html'">
+            <option value="Vijayawada" style="color:#000;">Vijayawada, AP ▾</option>
+            <option value="Benz Circle" style="color:#000;">Benz Circle, VJA</option>
+            <option value="Bhavanipuram" style="color:#000;">Bhavanipuram, VJA</option>
+            <option value="Autonagar" style="color:#000;">Autonagar, VJA</option>
+            <option value="Machavaram" style="color:#000;">Machavaram, VJA</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -470,22 +478,22 @@
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="bnav active" onclick="window.location.href='index.html'">
+  <button class="bnav active" onclick="window.scrollTo(0,0); window.location.href='index.html'">
     <span class="bicon">🏠</span><span class="blabel">Home</span>
   </button>
-  <button class="bnav" onclick="window.location.href='events.html'">
+  <button class="bnav" onclick="window.scrollTo(0,0); window.location.href='events.html'">
     <span class="bicon">🎪</span><span class="blabel">Events</span>
   </button>
-  <button class="bnav" onclick="openFavs()">
+  <button class="bnav" onclick="window.scrollTo(0,0); window.location.href='favourites.html'">
     <span class="bicon" style="position:relative;">🤍<span class="bnav-badge" id="bnavFavBadge" style="display:none"></span></span>
     <span class="blabel">Favourites</span>
   </button>
-  <button class="bnav" onclick="openTickets()">
+  <button class="bnav" onclick="window.scrollTo(0,0); window.location.href='tickets.html'">
     <span class="bicon">🎟️</span><span class="blabel">Tickets</span>
   </button>
-  <button class="bnav" onclick="goToProfile()">
+  <button class="bnav" onclick="window.scrollTo(0,0); window.location.href='account.html'">
     <div class="bnav-avatar" id="bnavAvatar">👤</div>
-    <span class="blabel">Profile</span>
+    <span class="blabel">Account</span>
   </button>
 </nav>
 
@@ -517,7 +525,7 @@ function renderFeatured() {
           <div class="feat-title">${ev.title}</div>
           <div class="feat-meta">📅 ${ev.date} &nbsp;|&nbsp; 📍 ${ev.location.split(',')[0]}</div>
           <div class="feat-price">₹${ev.price}</div>
-          ${i===0 ? `<button class="feat-btn">Book Now →</button>` : ''}
+          ${i===0 ? `<button class="feat-btn" onclick="event.stopPropagation(); openBooking(${ev.id})">Book Now →</button>` : ''}
         </div>
       </div>
     </div>`).join('');

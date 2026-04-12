@@ -256,27 +256,8 @@ function toggleFav(id, btn) {
     updateBadges();
 }
 
-function openFavs() {
-    const favs    = getFavs();
-    const content = document.getElementById('favsContent');
-    if (!favs.length) {
-        content.innerHTML = '<div style="text-align:center;padding:40px;color:#777;">No favourites yet. Tap ❤️ on any event!</div>';
-    } else {
-        const favEvents = ALL_EVENTS.filter(e => favs.includes(e.id));
-        content.innerHTML = favEvents.map(ev => `
-            <div style="display:flex;gap:12px;align-items:center;padding:12px;background:#1c1c2e;border-radius:12px;margin-bottom:10px;border:1px solid #2a2a45;">
-                <img src="${ev.image}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;" onerror="imgError(this)"/>
-                <div style="flex:1;">
-                    <h4 style="font-size:14px;margin-bottom:4px;">${ev.title}</h4>
-                    <p style="font-size:12px;color:#777;">📅 ${ev.date} &nbsp;|&nbsp; ₹${ev.price}</p>
-                </div>
-                <button onclick="openBooking(${ev.id});closeFavs()" style="padding:8px 14px;background:#00c9a7;color:#09090f;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">Book</button>
-            </div>`).join('');
-    }
-    document.getElementById('favsPanel').classList.add('show');
-}
-
-function closeFavs()  { document.getElementById('favsPanel').classList.remove('show'); }
+function openFavs() { window.location.href = 'favourites.html'; }
+function closeFavs()  { }
 
 // ── NOTIFICATIONS ──────────────────────────────────────────────────────────
 function addNotif(msg) {
@@ -289,24 +270,8 @@ function addNotif(msg) {
     updateBadges();
 }
 
-function openNotif() {
-    const notifs  = getNotifs();
-    const content = document.getElementById('notifContent');
-    if (!notifs.length) {
-        content.innerHTML = '<div style="text-align:center;padding:40px;color:#777;">No notifications yet.</div>';
-    } else {
-        content.innerHTML = notifs.map(n => `
-            <div style="padding:12px;background:${n.read ? '#1c1c2e' : '#1e1040'};border-radius:10px;margin-bottom:8px;border:1px solid #2a2a45;font-size:14px;">
-                ${n.msg}
-                <div style="font-size:11px;color:#555;margin-top:4px;">${n.time}</div>
-            </div>`).join('');
-    }
-    saveNotifs(notifs.map(n => ({ ...n, read: true })));
-    updateBadges();
-    document.getElementById('notifPanel').classList.add('show');
-}
-
-function closeNotif() { document.getElementById('notifPanel').classList.remove('show'); }
+function openNotif() { window.location.href = 'notifications.html'; }
+function closeNotif() { }
 
 // ── BOOKING ────────────────────────────────────────────────────────────────
 function openBooking(id) {
@@ -415,73 +380,14 @@ function closeSuccess() { document.getElementById('successModal').classList.remo
 
 // ── NAVIGATION ─────────────────────────────────────────────────────────────
 
-function goToProfile() {
-    const user = getUser();
-    const content = document.getElementById('profileContent');
-    if (content) {
-        if (!user) {
-            content.innerHTML = `<div style="text-align:center;padding:40px;color:#777;">
-                Please <a href="login.html" style="color:#00c9a7;">login</a> to view your profile.</div>`;
-        } else {
-            content.innerHTML = `
-                <div style="text-align:center;padding:20px;">
-                    <div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#7b61ff,#00c9a7);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto 12px;">${((user.firstName||'')[0]||(user.email[0]||'U')).toUpperCase()}</div>
-                    <h3 style="margin-bottom:4px;">${user.firstName || ''} ${user.lastName || ''}</h3>
-                    <p style="color:#888;font-size:13px;">${user.email}</p>
-                    ${user.institution ? `<p style="color:#888;font-size:13px;">🏫 ${user.institution}</p>` : ''}
-                </div>
-                <hr style="border-color:#2a2a45;margin:16px 0;"/>
-                <button onclick="logout()" style="width:100%;padding:12px;background:#ff4d6d;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;">🚪 Logout</button>`;
-        }
-    }
-    document.getElementById('profilePanel').classList.add('show');
-}
-function closeProfile() { document.getElementById('profilePanel').classList.remove('show'); }
+function goToProfile() { window.location.href = 'profile.html'; }
+function closeProfile() { }
 function logout() {
     localStorage.removeItem('eventhub_user');
-    closeProfile();
-    updateAuthUI();
-    showToast('Logged out successfully');
+    window.location.href = 'index.html';
 }
-function openTickets() {
-    const tickets = getTickets();
-    const content = document.getElementById('ticketsContent');
-
-    if (!content) {
-        console.error("ticketsContent missing");
-        return;
-    }
-
-    if (!tickets.length) {
-        content.innerHTML = `
-            <div style="text-align:center;padding:40px;color:#777;">
-                No tickets yet 🎟️
-            </div>`;
-    } else {
-        content.innerHTML = tickets.map(t => `
-            <div style="display:flex;gap:12px;align-items:center;padding:12px;background:#1c1c2e;border-radius:12px;margin-bottom:10px;border:1px solid #2a2a45;">
-                
-                <div style="font-size:22px;">🎟️</div>
-
-                <div style="flex:1;">
-                    <h4 style="font-size:14px;margin-bottom:4px;">${t.title}</h4>
-                    <p style="font-size:12px;color:#777;">
-                        📅 ${t.date} &nbsp;|&nbsp; ${t.time}<br/>
-                        📍 ${t.location}<br/>
-                        💰 ₹${t.price}<br/>
-                        🔖 ${t.ticketId}
-                    </p>
-                </div>
-
-            </div>
-        `).join('');
-    }
-
-    document.getElementById('ticketsPanel').classList.add('show');
-}
-function closeTickets() {
-    document.getElementById('ticketsPanel').classList.remove('show');
-}
+function openTickets() { window.location.href = 'tickets.html'; }
+function closeTickets() { }
 // ── AI ─────────────────────────────────────────────────────────────────────
 async function getAISuggestion() {
     const input = document.getElementById('ai-input').value.trim();

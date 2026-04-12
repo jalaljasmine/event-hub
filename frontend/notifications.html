@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EventHub | Notifications</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+.page-wrap { max-width: 640px; margin: 0 auto; padding: 90px 20px 100px; }
+.page-hero { margin-bottom: 28px; }
+.page-hero h1 { font-family:'Syne',sans-serif; font-size:32px; font-weight:800; margin-bottom:6px; }
+.page-hero p  { color:var(--text3); font-size:14px; }
+
+.empty-state { text-align:center; padding:80px 20px; color:#777; }
+</style>
+</head>
+<body>
+<div id="starfield"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<header class="main-header">
+  <div class="header-left">
+    <a href="index.html" class="logo-text" style="text-decoration:none">EventHub</a>
+  </div>
+  <div class="header-right"><div id="authBtn"></div></div>
+</header>
+
+<div class="page-wrap">
+  <div class="page-hero">
+    <h1>🔔 Notifications</h1>
+    <p id="notifCount">Loading...</p>
+  </div>
+  <div id="notifList"></div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bnav" onclick="location.href='index.html'"><span class="bicon">🏠</span><span class="blabel">Home</span></button>
+  <button class="bnav" onclick="location.href='events.html'"><span class="bicon">🎪</span><span class="blabel">Events</span></button>
+  <button class="bnav" onclick="location.href='favourites.html'"><span class="bicon">🤍</span><span class="blabel">Favourites</span></button>
+  <button class="bnav" onclick="location.href='tickets.html'"><span class="bicon">🎟️</span><span class="blabel">Tickets</span></button>
+  <button class="bnav" onclick="location.href='profile.html'"><div class="bnav-avatar" id="bnavAvatar">👤</div><span class="blabel">Profile</span></button>
+</nav>
+
+<script src="script.js"></script>
+<script>
+(function(){const sf=document.getElementById("starfield");if(!sf)return;for(let i=0;i<50;i++){const s=document.createElement("div");s.className="star-dot";const z=Math.random()*1.5+0.5;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;--lo:${(Math.random()*0.12+0.03).toFixed(2)};opacity:${(Math.random()*0.12+0.03).toFixed(2)};`;sf.appendChild(s);}})();
+
+function renderNotifs() {
+  const notifs = getNotifs();
+  const count = document.getElementById('notifCount');
+  const list = document.getElementById('notifList');
+
+  count.textContent = `${notifs.length} notification${notifs.length!==1?'s':''}`;
+
+  if (!notifs.length) {
+    list.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:16px;">🔕</div><h2>All caught up!</h2><p>No new notifications right now.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = notifs.map(n => `
+    <div style="padding:16px;background:${n.read ? 'var(--surface)' : 'rgba(123,97,255,0.1)'};border-radius:16px;margin-bottom:12px;border:1px solid ${n.read ? 'var(--border2)' : 'rgba(123,97,255,0.3)'}; transition:all 0.2s;">
+        <div style="font-size:15px; color:var(--text); line-height:1.4;">${n.msg}</div>
+        <div style="font-size:12px; color:var(--text3); margin-top:8px; font-weight:600;">${n.time}</div>
+    </div>`).join('');
+    
+  saveNotifs(notifs.map(n => ({ ...n, read: true })));
+  updateBadges();
+}
+
+window.onload = function() { updateAuthUI(); renderNotifs(); };
+</script>
+</body>
+</html>

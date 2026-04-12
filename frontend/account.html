@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EventHub | My Account</title>
+    <link rel="stylesheet" href="style.css"/>
+    <style>
+        body { min-height:100vh; padding-bottom:90px; }
+        .page-body { max-width:560px; margin:0 auto; padding:0 16px 24px; }
+
+        /* HERO */
+        .acct-hero {
+            background:linear-gradient(135deg,#1a0a2a,#0d0d28);
+            border-bottom:1px solid rgba(255,255,255,0.07);
+            padding:40px 24px 32px; text-align:center; position:relative; overflow:hidden;
+        }
+        .acct-hero::before {
+            content:''; position:absolute; top:-60px; left:50%; transform:translateX(-50%);
+            width:300px; height:300px; border-radius:50%;
+            background:radial-gradient(circle,rgba(255,107,53,0.12) 0%,transparent 70%);
+            pointer-events:none;
+        }
+        .acct-avatar {
+            width:88px; height:88px; border-radius:28px;
+            background:linear-gradient(135deg,#ff6b35,#f72585);
+            display:flex; align-items:center; justify-content:center;
+            font-size:38px; font-weight:900; color:#fff; margin:0 auto 16px;
+            box-shadow:0 8px 32px rgba(255,107,53,0.4);
+            position:relative; z-index:1;
+        }
+        .acct-name  { font-size:24px; font-weight:900; margin-bottom:4px; }
+        .acct-email { font-size:13px; color:rgba(255,255,255,0.45); margin-bottom:6px; }
+        .acct-role-badge {
+            display:inline-block; padding:5px 16px; border-radius:20px; margin-top:6px;
+            background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.25);
+            font-size:11px; font-weight:800; color:#ff6b35; letter-spacing:1px; text-transform:uppercase;
+        }
+
+        /* STATS */
+        .stats-grid {
+            display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+            padding:20px 0;
+        }
+        .stat-box {
+            background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+            border-radius:16px; padding:16px 10px; text-align:center;
+        }
+        .stat-num {
+            font-size:26px; font-weight:900;
+            background:linear-gradient(135deg,#ff6b35,#f72585);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .stat-lbl { font-size:10px; color:rgba(255,255,255,0.35); margin-top:3px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+
+        /* MENU */
+        .menu-section { margin-bottom:16px; }
+        .menu-section-title { font-size:11px; font-weight:700; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:1px; padding:0 4px; margin-bottom:8px; }
+        .menu-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:18px; overflow:hidden; }
+        .menu-row {
+            display:flex; align-items:center; gap:14px; padding:17px 18px;
+            cursor:pointer; transition:background .2s;
+            border-bottom:1px solid rgba(255,255,255,0.05);
+        }
+        .menu-row:last-child { border-bottom:none; }
+        .menu-row:hover { background:rgba(255,255,255,0.04); }
+        .menu-row-icon {
+            width:38px; height:38px; border-radius:12px;
+            display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
+        }
+        .menu-row-label { font-size:14px; font-weight:600; }
+        .menu-row-sub   { font-size:11px; color:rgba(255,255,255,0.35); margin-top:1px; }
+        .menu-row-badge {
+            margin-left:auto; padding:3px 10px; border-radius:20px;
+            font-size:11px; font-weight:800;
+        }
+        .menu-row-arrow { color:rgba(255,255,255,0.2); font-size:18px; margin-left:8px; }
+
+        /* RECENT TICKETS */
+        .recent-ticket {
+            display:flex; gap:12px; align-items:center; padding:14px;
+            background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);
+            border-radius:14px; margin-bottom:10px; cursor:pointer; transition:all .2s;
+        }
+        .recent-ticket:hover { background:rgba(255,107,53,0.06); border-color:rgba(255,107,53,0.2); }
+        .rt-icon { font-size:26px; width:44px; text-align:center; flex-shrink:0; }
+        .rt-info h4 { font-size:13px; font-weight:800; margin-bottom:3px; }
+        .rt-info p  { font-size:11px; color:rgba(255,255,255,0.4); line-height:1.6; }
+        .rt-id { font-size:11px; font-weight:700; color:#ff6b35; margin-top:2px; }
+
+        /* LOGOUT */
+        .logout-btn {
+            width:100%; padding:16px; margin-top:8px;
+            background:rgba(255,71,87,0.08); border:1.5px solid rgba(255,71,87,0.25);
+            border-radius:16px; color:#ff4757; font-size:15px; font-weight:800;
+            cursor:pointer; font-family:'Outfit',sans-serif; transition:all .2s;
+        }
+        .logout-btn:hover { background:rgba(255,71,87,0.18); border-color:rgba(255,71,87,0.5); }
+    </style>
+</head>
+<body>
+<div id="starfield"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- HERO SECTION (replaces sticky header here) -->
+<div class="acct-hero" id="acctHero">
+    <div class="acct-avatar" id="acctAvatar">👤</div>
+    <div class="acct-name"  id="acctName">Loading...</div>
+    <div class="acct-email" id="acctEmail"></div>
+    <div id="acctInst"></div>
+    <div class="acct-role-badge" id="acctRole">Attendee</div>
+</div>
+
+<div class="page-body">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="statTickets">0</div><div class="stat-lbl">Tickets</div></div>
+        <div class="stat-box"><div class="stat-num" id="statFavs">0</div><div class="stat-lbl">Favourites</div></div>
+        <div class="stat-box"><div class="stat-num" id="statSpent">₹0</div><div class="stat-lbl">Spent</div></div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="menu-section">
+        <div class="menu-section-title">Quick Actions</div>
+        <div class="menu-card">
+            <div class="menu-row" onclick="window.location.href='tickets.html'">
+                <div class="menu-row-icon" style="background:rgba(255,107,53,0.12);">🎟️</div>
+                <div><div class="menu-row-label">My Tickets</div><div class="menu-row-sub">View all booked events</div></div>
+                <div class="menu-row-badge" id="badgeTickets" style="background:rgba(255,107,53,0.12);color:#ff6b35;">0</div>
+                <div class="menu-row-arrow">›</div>
+            </div>
+            <div class="menu-row" onclick="window.location.href='favourites.html'">
+                <div class="menu-row-icon" style="background:rgba(247,37,133,0.12);">❤️</div>
+                <div><div class="menu-row-label">My Favourites</div><div class="menu-row-sub">Saved events</div></div>
+                <div class="menu-row-badge" id="badgeFavs" style="background:rgba(247,37,133,0.12);color:#f72585;">0</div>
+                <div class="menu-row-arrow">›</div>
+            </div>
+            <div class="menu-row" onclick="window.location.href='index.html'">
+                <div class="menu-row-icon" style="background:rgba(67,97,238,0.12);">🔍</div>
+                <div><div class="menu-row-label">Browse Events</div><div class="menu-row-sub">Discover events in Vijayawada</div></div>
+                <div class="menu-row-arrow">›</div>
+            </div>
+            <div id="orgMenuRow" style="display:none;">
+                <div class="menu-row" onclick="window.location.href='organizer.html'">
+                    <div class="menu-row-icon" style="background:rgba(6,214,160,0.12);">🏢</div>
+                    <div><div class="menu-row-label">Organizer Dashboard</div><div class="menu-row-sub">Manage your events</div></div>
+                    <div class="menu-row-arrow">›</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECENT TICKETS -->
+    <div class="menu-section">
+        <div class="menu-section-title">Recent Tickets</div>
+        <div id="recentTickets"></div>
+    </div>
+
+    <!-- ACCOUNT INFO -->
+    <div class="menu-section">
+        <div class="menu-section-title">Account Info</div>
+        <div class="menu-card" id="acctInfoCard"></div>
+    </div>
+
+    <!-- LOGOUT -->
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <button class="bnav" onclick="window.location.href='index.html'">
+        <span class="bicon">🏠</span><span class="blabel">Home</span>
+    </button>
+    <button class="bnav" onclick="window.location.href='favourites.html'">
+        <span class="bicon">🤍</span><span class="blabel">Favourites</span>
+    </button>
+    <button class="bnav" onclick="window.location.href='tickets.html'">
+        <span class="bicon">🎟️</span><span class="blabel">Tickets</span>
+    </button>
+    <button class="bnav active" onclick="window.location.href='account.html'">
+        <div class="bnav-avatar" id="bnavAvatar">👤</div>
+        <span class="blabel">Profile</span>
+    </button>
+</nav>
+
+<script>
+(function(){
+    const sf=document.getElementById('starfield');if(!sf)return;
+    for(let i=0;i<60;i++){const s=document.createElement('div');s.className='star-dot';const sz=Math.random()*1.8+0.4;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;--lo:0.1;opacity:0.08;`;sf.appendChild(s);}
+})();
+
+const getUser    = ()=>JSON.parse(localStorage.getItem('eventhub_user')||'null');
+const getTickets = ()=>JSON.parse(localStorage.getItem('eventhub_tickets')||'[]');
+const getFavs    = ()=>JSON.parse(localStorage.getItem('eventhub_favorites')||'[]');
+const catEmoji   = {music:'🎵',jazz:'🎷',hiphop:'🎤',classical:'🎻',tech:'💻',food:'🍕',sports:'⚽'};
+
+window.onload = function(){
+    const user = getUser();
+    if(!user){
+        document.getElementById('acctName').textContent='Not logged in';
+        document.getElementById('acctEmail').textContent='';
+        document.getElementById('acctRole').textContent='Guest';
+        document.getElementById('recentTickets').innerHTML=`
+            <div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:13px;background:rgba(255,255,255,0.03);border-radius:14px;">
+                <a href="login.html" style="color:#ff6b35;font-weight:700;">Login</a> to see your tickets
+            </div>`;
+        return;
+    }
+
+    const initials = ((user.firstName||'')[0]||(user.email[0]||'U')).toUpperCase();
+    const tickets  = getTickets().filter(t=>t.email===user.email);
+    const favs     = getFavs();
+    const spent    = tickets.reduce((s,t)=>s+(Number(t.price)||0),0);
+    const joinDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : 'Recently';
+
+    // Hero
+    document.getElementById('acctAvatar').textContent = initials;
+    document.getElementById('acctName').textContent   = `${user.firstName||''} ${user.lastName||''}`.trim();
+    document.getElementById('acctEmail').textContent  = user.email;
+    document.getElementById('acctRole').textContent   = user.role==='organizer' ? '🏢 Organizer' : '🎟️ Attendee';
+    const userCity = user.city || localStorage.getItem('eventhub_city') || '';
+    if(userCity) document.getElementById('acctInst').innerHTML=`<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">📍 ${userCity}</div>`;
+
+    // Bottom nav avatar
+    const bav=document.getElementById('bnavAvatar');
+    if(bav){bav.textContent=initials;bav.style.background='linear-gradient(135deg,#ff6b35,#f72585)';bav.style.color='#fff';}
+
+    // Stats
+    document.getElementById('statTickets').textContent = tickets.length;
+    document.getElementById('statFavs').textContent    = favs.length;
+    document.getElementById('statSpent').textContent   = spent>0?'₹'+spent.toLocaleString('en-IN'):'₹0';
+    document.getElementById('badgeTickets').textContent= tickets.length;
+    document.getElementById('badgeFavs').textContent   = favs.length;
+
+    // Organizer menu
+    if(user.role==='organizer') document.getElementById('orgMenuRow').style.display='block';
+
+    // Recent tickets
+    const recent = tickets.slice(-3).reverse();
+    const rtEl   = document.getElementById('recentTickets');
+    if(!recent.length){
+        rtEl.innerHTML=`<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:13px;background:rgba(255,255,255,0.03);border-radius:14px;">No tickets yet — <a href="index.html" style="color:#ff6b35;font-weight:700;">browse events</a></div>`;
+    } else {
+        rtEl.innerHTML = recent.map(t=>`
+            <div class="recent-ticket" onclick="window.location.href='tickets.html'">
+                <div class="rt-icon">${catEmoji[t.category]||'🎪'}</div>
+                <div style="flex:1;">
+                    <h4 class="rt-info" style="font-size:13px;font-weight:800;margin-bottom:3px;">${t.title}</h4>
+                    <p class="rt-info" style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;">📅 ${t.date} · ₹${t.price}</p>
+                    <div class="rt-id">${t.ticketId}</div>
+                </div>
+                <div style="color:rgba(255,255,255,0.2);font-size:18px;">›</div>
+            </div>`).join('');
+        if(tickets.length>3){
+            rtEl.innerHTML+=`<div style="text-align:center;padding:10px;font-size:13px;color:#ff6b35;font-weight:700;cursor:pointer;" onclick="window.location.href='tickets.html'">View all ${tickets.length} tickets →</div>`;
+        }
+    }
+
+    // Account info card
+    document.getElementById('acctInfoCard').innerHTML=`
+        <div class="menu-row" style="cursor:default;">
+            <div class="menu-row-icon" style="background:rgba(255,255,255,0.06);">📧</div>
+            <div><div class="menu-row-label">Email</div><div class="menu-row-sub">${user.email}</div></div>
+        </div>
+        <div class="menu-row" style="cursor:default;">
+            <div class="menu-row-icon" style="background:rgba(255,255,255,0.06);">📅</div>
+            <div><div class="menu-row-label">Member Since</div><div class="menu-row-sub">${joinDate}</div></div>
+        </div>
+        ${(user.city||localStorage.getItem('eventhub_city'))?`
+        <div class="menu-row" style="cursor:default;">
+            <div class="menu-row-icon" style="background:rgba(255,255,255,0.06);">📍</div>
+            <div><div class="menu-row-label">City</div><div class="menu-row-sub">${user.city||localStorage.getItem('eventhub_city')||'Vijayawada'}</div></div>
+        </div>`:''}`;
+};
+
+function logout(){
+    if(!confirm('Are you sure you want to logout?')) return;
+    localStorage.removeItem('eventhub_user');
+    window.location.href='index.html';
+}
+</script>
+</body>
+</html>

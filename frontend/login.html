@@ -96,9 +96,10 @@
             <label>Email</label>
             <input type="email" id="regEmail" placeholder="you@email.com"/>
         </div>
+
         <div class="form-group">
-            <label>Institution / Organization</label>
-            <input type="text" id="regInstitution" placeholder="SRM University / Jazz Club VJA"/>
+            <label>Location</label>
+            <input type="text" id="regLocation" placeholder="Enter location (e.g. Benz Circle, Vijayawada)"/>
         </div>
         <div class="form-group">
             <label>Password</label>
@@ -165,14 +166,14 @@ async function doRegister() {
     const firstName   = document.getElementById('regFirst').value.trim();
     const lastName    = document.getElementById('regLast').value.trim();
     const email       = document.getElementById('regEmail').value.trim();
-    const institution = document.getElementById('regInstitution').value.trim();
+    const location    = document.getElementById('regLocation').value.trim();
     const password    = document.getElementById('regPassword').value;
     const err         = document.getElementById('registerErr');
 
     if (!firstName || !email || !password) { showErr(err, 'Please fill required fields.'); return; }
     if (password.length < 6)               { showErr(err, 'Password must be at least 6 characters.'); return; }
 
-    const userData = { firstName, lastName, email, institution, password, role: selectedRole };
+    const userData = { firstName, lastName, email, location, password, role: selectedRole };
 
     try {
         const res  = await fetch('http://127.0.0.1:5000/register', {
@@ -185,12 +186,21 @@ async function doRegister() {
             localStorage.setItem('eventhub_visited', '1');
             window.location.href = selectedRole === 'organizer' ? 'organizer.html' : 'index.html';
         } else {
-            showErr(err, data.message || 'Registration failed.');
+            if (data.message === 'Email already registered.') {
+                showErr(err, 'Email already registered. Please Login.');
+                setTimeout(() => switchTab('login'), 1500);
+            } else {
+                showErr(err, data.message || 'Registration failed.');
+            }
         }
     } catch {
         // Offline fallback — save locally
         const users = JSON.parse(localStorage.getItem('eventhub_local_users') || '[]');
-        if (users.find(u => u.email === email)) { showErr(err, 'Email already registered.'); return; }
+        if (users.find(u => u.email === email)) { 
+            showErr(err, 'Email already registered. Please Login.'); 
+            setTimeout(() => switchTab('login'), 1500);
+            return; 
+        }
         const user = { ...userData, id: 'local_' + Date.now() };
         users.push(user);
         localStorage.setItem('eventhub_local_users', JSON.stringify(users));

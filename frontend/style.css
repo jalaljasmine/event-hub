@@ -181,7 +181,7 @@ img { max-width: 100%; }
 
 /* ── HEADER ──────────────────────────────────────────────────────────────── */
 .main-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    position: fixed !important; top: 0; left: 0; right: 0; z-index: 1000 !important;
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 24px;
     background: rgba(8,8,16,0.85); backdrop-filter: blur(20px);
@@ -249,7 +249,7 @@ img { max-width: 100%; }
 
 /* ── BOTTOM NAV ──────────────────────────────────────────────────────────── */
 .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    position: fixed !important; bottom: 0; left: 0; right: 0; z-index: 2000 !important;
     display: flex; align-items: stretch;
     background: rgba(8,8,16,0.97); backdrop-filter: blur(24px);
     border-top: 1px solid var(--border); height: 68px;

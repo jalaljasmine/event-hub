@@ -173,7 +173,10 @@ function render() {
       </div>
       <div class="tkt-bottom">
         <div class="tkt-id-row">
-          <div>
+          <div class="tkt-qr">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=00c9a7&bgcolor=1c1c2e&data=${t.ticketId}" alt="QR Code"/>
+          </div>
+          <div style="flex:1;">
             <div class="tkt-id">${t.ticketId}</div>
             <div style="font-size:11px;color:var(--text3);margin-top:4px;">Show this at entry</div>
           </div>
