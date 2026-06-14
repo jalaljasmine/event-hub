@@ -200,10 +200,8 @@
 
 <script>
 const getUser    = () => JSON.parse(localStorage.getItem('eventhub_user') || 'null');
-const getTickets = () => JSON.parse(localStorage.getItem('eventhub_tickets') || '[]');
-const getOrgEvents = () => JSON.parse(localStorage.getItem('eventhub_org_events') || '[]');
-const saveOrgEvents = e => localStorage.setItem('eventhub_org_events', JSON.stringify(e));
 
+let orgEvents = [];
 let editingId = null;
 
 // ── GUARD ──────────────────────────────────────────────────────────────────
@@ -217,9 +215,24 @@ window.onload = function() {
     const initials = ((user.firstName||'')[0] || 'O').toUpperCase();
     document.getElementById('orgAvatar').textContent = initials;
     document.getElementById('orgName').textContent   = user.firstName || 'Organizer';
-    renderEvents();
-    updateStats();
+    fetchOrgEvents();
 };
+
+async function fetchOrgEvents() {
+    const user = getUser();
+    if (!user) return;
+    try {
+        const res = await fetch(`http://127.0.0.1:5000/events?organizer=${encodeURIComponent(user.email)}`);
+        const data = await res.json();
+        if (data.success) {
+            orgEvents = data.events;
+            renderEvents();
+            updateStats();
+        }
+    } catch (err) {
+        console.error("Failed to fetch organizer events:", err);
+    }
+}
 
 function logout() {
     localStorage.removeItem('eventhub_user');
@@ -246,7 +259,7 @@ function clearForm() {
 }
 
 // ── SAVE EVENT ─────────────────────────────────────────────────────────────
-function saveEvent() {
+async function saveEvent() {
     const user = getUser();
     const title    = document.getElementById('fTitle').value.trim();
     const price    = parseInt(document.getElementById('fPrice').value);
@@ -268,57 +281,58 @@ function saveEvent() {
     const dateStr  = dateObj.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
     const timeStr  = dateObj.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
 
-    const events = getOrgEvents();
-    if (editingId) {
-        const idx = events.findIndex(e => e.id === editingId);
-        if (idx !== -1) {
-            events[idx] = { ...events[idx],
-                title, price, date: dateStr, time: timeStr, capacity, location,
-                category: document.getElementById('fCategory').value,
-                description: document.getElementById('fDesc').value.trim(),
-                image: document.getElementById('fImage').value.trim() || 'event1.jpg'
-            };
-        }
-        editingId = null;
-    } else {
-        events.push({
-            id:          'org_' + Date.now(),
-            title, price, date: dateStr, time: timeStr, capacity, location,
-            category:    document.getElementById('fCategory').value,
-            description: document.getElementById('fDesc').value.trim(),
-            image:       document.getElementById('fImage').value.trim() || 'event1.jpg',
-            organizer:   user.email,
-            createdAt:   new Date().toISOString()
+    const eventData = {
+        title, price, date: dateStr, time: timeStr, capacity, location,
+        category: document.getElementById('fCategory').value,
+        description: document.getElementById('fDesc').value.trim(),
+        image: document.getElementById('fImage').value.trim() || 'event1.jpg',
+        organizer: user.email
+    };
+
+    const url = editingId ? `http://127.0.0.1:5000/events/${editingId}` : 'http://127.0.0.1:5000/events';
+    const method = editingId ? 'PUT' : 'POST';
+
+    try {
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(eventData)
         });
+        const result = await res.json();
+        if (result.success) {
+            editingId = null;
+            clearForm();
+            document.getElementById('addForm').classList.remove('open');
+            await fetchOrgEvents();
+        } else {
+            alert(result.message || 'Failed to save event.');
+        }
+    } catch (err) {
+        console.error("Error saving event:", err);
+        alert('Failed to connect to the server.');
     }
-
-    saveOrgEvents(events);
-    // Also push into the shared ALL_EVENTS pool used by index.html
-    syncToSharedPool(events);
-    clearForm();
-    document.getElementById('addForm').classList.remove('open');
-    renderEvents();
-    updateStats();
-}
-
-function syncToSharedPool(orgEvents) {
-    // Merge organizer events into a shared localStorage key that index.html can read
-    localStorage.setItem('eventhub_extra_events', JSON.stringify(orgEvents));
 }
 
 // ── DELETE ─────────────────────────────────────────────────────────────────
-function deleteEvent(id) {
+async function deleteEvent(id) {
     if (!confirm('Delete this event? This cannot be undone.')) return;
-    const events = getOrgEvents().filter(e => e.id !== id);
-    saveOrgEvents(events);
-    syncToSharedPool(events);
-    renderEvents();
-    updateStats();
+    try {
+        const res = await fetch(`http://127.0.0.1:5000/events/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+            await fetchOrgEvents();
+        } else {
+            alert(result.message || 'Failed to delete event.');
+        }
+    } catch (err) {
+        console.error("Error deleting event:", err);
+        alert('Failed to connect to the server.');
+    }
 }
 
 // ── EDIT ───────────────────────────────────────────────────────────────────
 function editEvent(id) {
-    const ev = getOrgEvents().find(e => e.id === id);
+    const ev = orgEvents.find(e => e.id === id);
     if (!ev) return;
     editingId = id;
     document.getElementById('fTitle').value    = ev.title;
@@ -335,19 +349,17 @@ function editEvent(id) {
 
 // ── RENDER ─────────────────────────────────────────────────────────────────
 function renderEvents() {
-    const events  = getOrgEvents();
-    const tickets = getTickets();
     const table   = document.getElementById('eventsTable');
 
-    if (!events.length) {
+    if (!orgEvents.length) {
         table.innerHTML = `<div class="empty-org"><div>🎪</div><div>No events yet. Click "+ Add New Event" to get started!</div></div>`;
         return;
     }
 
     const catIcons = { music:'🎵', jazz:'🎷', hiphop:'🎤', classical:'🎻', tech:'💻', food:'🍕', sports:'⚽' };
 
-    table.innerHTML = events.map(ev => {
-        const sold     = tickets.filter(t => t.eventId == ev.id).length;
+    table.innerHTML = orgEvents.map(ev => {
+        const sold     = ev.bookedCount || 0;
         const pct      = ev.capacity ? Math.min(Math.round(sold / ev.capacity * 100), 100) : 0;
         const isFull   = sold >= ev.capacity;
         return `
@@ -380,15 +392,13 @@ function renderEvents() {
 }
 
 function updateStats() {
-    const events  = getOrgEvents();
-    const tickets = getTickets();
-    const user    = getUser();
-    const myTickets = tickets.filter(t => events.some(e => e.id == t.eventId));
-    const revenue   = myTickets.reduce((s, t) => s + (t.price || 0), 0);
+    const totalEvents = orgEvents.length;
+    const totalTickets = orgEvents.reduce((sum, ev) => sum + (ev.bookedCount || 0), 0);
+    const totalRevenue = orgEvents.reduce((sum, ev) => sum + (ev.bookedCount || 0) * (ev.price || 0), 0);
 
-    document.getElementById('statEvents').textContent  = events.length;
-    document.getElementById('statTickets').textContent = myTickets.length;
-    document.getElementById('statRevenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+    document.getElementById('statEvents').textContent  = totalEvents;
+    document.getElementById('statTickets').textContent = totalTickets;
+    document.getElementById('statRevenue').textContent = '₹' + totalRevenue.toLocaleString('en-IN');
 }
 </script>
 </body>

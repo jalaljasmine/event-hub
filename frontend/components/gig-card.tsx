@@ -76,7 +76,7 @@ export default function GigCard({ gig }: { gig: Gig }) {
             </div>
           </div>
 
-          {/* Action */}
+        {/* Action */}
           <button className="w-full py-2 px-4 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-900 font-medium text-sm transition">
             View Project
           </button>

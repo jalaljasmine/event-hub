@@ -49,6 +49,16 @@
       "password": "666666",
       "role": "attendee",
       "createdAt": "2026-04-11T12:51:22.085245"
+    },
+    {
+      "id": "a31d4513-b961-4b6b-8970-644b6784128d",
+      "firstName": "Hema Chandra",
+      "lastName": "Lanka",
+      "email": "hemachandra@gmail.com",
+      "institution": "",
+      "password": "Hema@2--7",
+      "role": "organizer",
+      "createdAt": "2026-04-18T09:41:41.240131"
     }
   ],
   "tickets": [
@@ -196,7 +206,7 @@
     {
       "ticketId": "TKT151E84",
       "email": "shaikashifa@gmail.com",
-      "eventId": null,
+      "eventId": 3,
       "title": "Jazz After Dark",
       "date": "May 28, 2026",
       "time": "8:00 PM",
@@ -209,7 +219,7 @@
     {
       "ticketId": "TKT0E6868",
       "email": "shaikashifa@gmail.com",
-      "eventId": null,
+      "eventId": 4,
       "title": "Hip-Hop Nation Tour",
       "date": "Jul 1, 2026",
       "time": "7:00 PM",
@@ -222,7 +232,7 @@
     {
       "ticketId": "TKT3B7886",
       "email": "jalalshaikjasmine2005@gmail.com",
-      "eventId": null,
+      "eventId": 2,
       "title": "Symphony of Sound",
       "date": "Jun 10, 2026",
       "time": "7:30 PM",
@@ -235,7 +245,7 @@
     {
       "ticketId": "TKT1F5DD5",
       "email": "jalalshaikjasmine2005@gmail.com",
-      "eventId": null,
+      "eventId": 1,
       "title": "National Music Festival",
       "date": "May 30, 2026",
       "time": "6:00 PM",
@@ -248,7 +258,7 @@
     {
       "ticketId": "TKTEFCD89",
       "email": "shaikashifa@gmail.com",
-      "eventId": null,
+      "eventId": 5,
       "title": "TechFest Vijayawada 2026",
       "date": "Jun 20, 2026",
       "time": "9:00 AM",
@@ -261,7 +271,7 @@
     {
       "ticketId": "TKT42D93E",
       "email": "nallanajyothikagowthami@gmail.com",
-      "eventId": null,
+      "eventId": 12,
       "title": "Dance Mania Championship",
       "date": "Jul 20, 2026",
       "time": "4:00 PM",
@@ -270,6 +280,32 @@
       "paymentId": "PAY81840043",
       "seatNum": "S154",
       "bookedOn": "2026-04-12T13:47:20.054742"
+    },
+    {
+      "ticketId": "TKTD95A6C",
+      "email": "jasmine_jalal@srmap.edu.in",
+      "eventId": 1,
+      "title": "National Music Festival",
+      "date": "May 30, 2026",
+      "time": "6:00 PM",
+      "location": "Siddhartha Amphitheatre, Vijayawada",
+      "price": 499,
+      "paymentId": "PAY86204868",
+      "seatNum": "S27",
+      "bookedOn": "2026-04-18T09:53:24.885864"
+    },
+    {
+      "ticketId": "TKTBCFC73",
+      "email": "jalalshaikjasmine2005@gmail.com",
+      "eventId": 1,
+      "title": "National Music Festival",
+      "date": "May 30, 2026",
+      "time": "6:00 PM",
+      "location": "Siddhartha Amphitheatre, Vijayawada",
+      "price": 499,
+      "paymentId": "PAY48977830",
+      "seatNum": "S104",
+      "bookedOn": "2026-06-14T20:26:17.838611"
     }
   ],
   "events": [],

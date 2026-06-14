@@ -26,12 +26,43 @@ const getNotifs  = () => JSON.parse(localStorage.getItem('eventhub_notifs')    |
 const saveFavs   = f => localStorage.setItem('eventhub_favorites', JSON.stringify(f));
 const saveTickets= t => localStorage.setItem('eventhub_tickets',   JSON.stringify(t));
 const saveNotifs = n => localStorage.setItem('eventhub_notifs',    JSON.stringify(n));
-const getBookedCount = (eventId) =>
-    getTickets().filter(t => Number(t.eventId) === Number(eventId)).length;
 
-const isSoldOut = (ev) => getBookedCount(ev.id) >= ev.capacity;
+// Cache for booked counts to reduce API calls
+const bookedCountCache = {};
+const cacheExpiry = 1000; // 1 second expiry for faster updates
 
-const seatsLeft = (ev) => Math.max(ev.capacity - getBookedCount(ev.id), 0);
+// Get booked count - fetches from backend for real-time data across all users
+async function getBookedCount(eventId) {
+    const now = Date.now();
+    if (bookedCountCache[eventId] && (now - bookedCountCache[eventId].time) < cacheExpiry) {
+        return bookedCountCache[eventId].count;
+    }
+    
+    try {
+        const res = await fetch(`http://127.0.0.1:5000/get-booked-count/${eventId}`);
+        const data = await res.json();
+        bookedCountCache[eventId] = { count: data.booked, time: now };
+        return data.booked;
+    } catch {
+        // Fallback to localStorage if API fails
+        return getTickets().filter(t => Number(t.eventId) === Number(eventId)).length;
+    }
+}
+
+// Sync versions using cached values (safe for rendering)
+const isSoldOut = (ev) => (ev.cachedBooked || 0) >= ev.capacity;
+const seatsLeft = (ev) => Math.max(ev.capacity - (ev.cachedBooked || 0), 0);
+
+// ── TICKET ID GENERATOR ────────────────────────────────────────────────────
+function generateTicketId() {
+    const chars = 'EVENTHUB';
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `EVT${year}${month}${day}${random}`;
+}
 
 // ── WELCOME ────────────────────────────────────────────────────────────────
 function checkWelcome() {
@@ -97,7 +128,9 @@ function imgError(el) {
 // ── RENDER CARDS ───────────────────────────────────────────────────────────
   function makeHCard(ev) {
     const isFav = getFavs().includes(ev.id);
-    const full = isSoldOut(ev);
+    const booked = ev.cachedBooked || getTickets().filter(t => Number(t.eventId) === Number(ev.id)).length;
+    const full = booked >= ev.capacity;
+    const available = Math.max(ev.capacity - booked, 0);
 
     return `
         <div class="ev-card-h">
@@ -110,7 +143,10 @@ function imgError(el) {
                 <h3>${ev.title}</h3>
                 <p class="ev-meta">📅 ${ev.date} • ${ev.time}</p>
                 <p class="ev-meta">📍 ${ev.location}</p>
-                <p class="ev-meta">🎫 ${full ? 'Sold out' : `${seatsLeft(ev)} / ${ev.capacity} seats left`}</p>
+                <p class="ev-meta" style="display:flex;align-items:center;gap:6px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${full ? '#ff4757' : '#06d6a0'};"></span>
+                    ${full ? 'Sold out' : `${booked}/${ev.capacity} seats · ${available} available`}
+                </p>
                 <div class="ev-price">₹${ev.price}</div>
                 <button class="ev-book-btn ${full ? 'sold-out' : ''}" onclick="openBooking(${ev.id})" ${full ? 'disabled' : ''}>
                     ${full ? 'Event Full' : 'Book Now'}
@@ -121,7 +157,9 @@ function imgError(el) {
 
 function makeGridCard(ev) {
     const isFav = getFavs().includes(ev.id);
-    const full = isSoldOut(ev);
+    const booked = ev.cachedBooked || getTickets().filter(t => Number(t.eventId) === Number(ev.id)).length;
+    const full = booked >= ev.capacity;
+    const available = Math.max(ev.capacity - booked, 0);
 
     return `
         <div class="ev-card-grid">
@@ -134,7 +172,10 @@ function makeGridCard(ev) {
                 <h3>${ev.title}</h3>
                 <p class="ev-meta">📅 ${ev.date} • ${ev.time}</p>
                 <p class="ev-meta">📍 ${ev.location}</p>
-                <p class="ev-meta">🎫 ${full ? 'Sold out' : `${seatsLeft(ev)} / ${ev.capacity} seats left`}</p>
+                <p class="ev-meta" style="display:flex;align-items:center;gap:6px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${full ? '#ff4757' : '#06d6a0'};"></span>
+                    ${full ? 'Sold out' : `${booked}/${ev.capacity} seats · ${available} available`}
+                </p>
                 <div class="ev-price">₹${ev.price}</div>
                 <button class="ev-book-btn ${full ? 'sold-out' : ''}" onclick="openBooking(${ev.id})" ${full ? 'disabled' : ''}>
                     ${full ? 'Event Full' : 'Book Now'}
@@ -326,9 +367,9 @@ async function confirmBooking() {
             return;
         }
 
-        const ticketId = data.ticketId || ('TKT' + Date.now().toString().slice(-6));
+        const ticketId = data.ticketId || generateTicketId();
         const tickets = getTickets();
-        tickets.push({ ...ev, ticketId, bookedOn: new Date().toLocaleDateString(), email: user.email });
+        tickets.push({ ...ev, eventId: ev.id, ticketId, bookedOn: new Date().toLocaleDateString(), email: user.email });
         saveTickets(tickets);
 
         addNotif(`🎟️ Ticket booked for "${ev.title}" — ID: ${ticketId}`);
@@ -347,9 +388,9 @@ async function confirmBooking() {
         pendingBooking = null;
 
     } catch {
-        const ticketId = 'TKT' + Date.now().toString().slice(-6);
+        const ticketId = generateTicketId();
         const tickets = getTickets();
-        tickets.push({ ...ev, ticketId, bookedOn: new Date().toLocaleDateString(), email: user.email });
+        tickets.push({ ...ev, eventId: ev.id, ticketId, bookedOn: new Date().toLocaleDateString(), email: user.email });
         saveTickets(tickets);
         addNotif(`🎟️ Ticket booked for "${ev.title}" — ID: ${ticketId}`);
         closeModal();
@@ -417,11 +458,49 @@ function showToast(msg) {
     setTimeout(() => t.remove(), 2500);
 }
 
+// ── REFRESH EVENTS ────────────────────────────────────────────────────────
+async function refreshEventDisplay() {
+    // Fetch real-time booked counts from backend
+    for (let ev of ALL_EVENTS) {
+        try {
+            const res = await fetch(`http://127.0.0.1:5000/get-booked-count/${ev.id}`);
+            const data = await res.json();
+            ev.cachedBooked = data.booked;
+        } catch {
+            // Fallback to localStorage count if API fails
+            ev.cachedBooked = getTickets().filter(t => Number(t.eventId) === Number(ev.id)).length;
+        }
+    }
+    
+    const filtered = currentFilter === 'all' ? ALL_EVENTS : ALL_EVENTS.filter(e => e.category === currentFilter);
+    renderAll(filtered);
+    if (showingAll) {
+        const grid = document.getElementById('allEventsGrid');
+        if (grid) grid.innerHTML = filtered.map(makeGridCard).join('');
+    }
+    if (typeof renderFeatured === 'function') renderFeatured();
+    if (typeof renderEvents === 'function') renderEvents();
+    updateBadges();
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────────
 window.onload = function () {
     checkWelcome();
     updateAuthUI();
     updateBadges();
-    renderAll(ALL_EVENTS);
+    
+    // Initial render with fresh data
+    refreshEventDisplay();
+    
+    // Refresh event display when page comes into focus (e.g., returning from payment)
+    window.addEventListener('focus', refreshEventDisplay);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            refreshEventDisplay();
+        }
+    });
+    
+    // Auto-refresh seat availability every 2 seconds so users see real-time bookings
+    setInterval(refreshEventDisplay, 2000);
 };
 

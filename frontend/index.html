@@ -322,6 +322,10 @@
     <div class="modal-icon">🎟️</div>
     <h2>Confirm Booking</h2>
     <div class="modal-event-info" id="modalEventInfo"></div>
+    <div style="margin: 15px 0; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <label for="bookingQty" style="font-size: 14px; color: var(--text2);">Quantity:</label>
+        <input type="number" id="bookingQty" value="1" min="1" max="10" style="width: 60px; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: #fff; text-align: center;" oninput="updateModalPrice()">
+    </div>
     <div class="modal-price" id="modalPrice"></div>
     <div class="modal-actions">
       <button class="btn-confirm" onclick="confirmBooking()">Confirm & Book</button>
@@ -515,7 +519,11 @@ function renderFeatured() {
   const grid = document.getElementById('featuredGrid');
   if (!grid) return;
   const featured = ALL_EVENTS.slice(0, 3);
-  grid.innerHTML = featured.map((ev, i) => `
+  grid.innerHTML = featured.map((ev, i) => {
+    const booked = ev.cachedBooked || getTickets().filter(t => Number(t.eventId) === Number(ev.id)).length;
+    const available = Math.max((ev.capacity || 0) - booked, 0);
+    const full = isSoldOut(ev);
+    return `
     <div class="feat-card ${i===0?'big':''}" onclick="openBooking(${ev.id})">
       <div class="feat-img">
         <img src="${ev.image}" alt="${ev.title}" onerror="this.style.display='none'"/>
@@ -524,11 +532,16 @@ function renderFeatured() {
           <div class="feat-cat">${ev.category}</div>
           <div class="feat-title">${ev.title}</div>
           <div class="feat-meta">📅 ${ev.date} &nbsp;|&nbsp; 📍 ${ev.location.split(',')[0]}</div>
+          <div class="feat-meta" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:${full ? '#ff4757' : '#06d6a0'};"></span>
+            <span>${full ? 'Sold out' : `${booked}/${ev.capacity} seats · ${available} available`}</span>
+          </div>
           <div class="feat-price">₹${ev.price}</div>
           ${i===0 ? `<button class="feat-btn" onclick="event.stopPropagation(); openBooking(${ev.id})">Book Now →</button>` : ''}
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function getAISuggestion() {

@@ -207,20 +207,27 @@ function getAllEvents() {
     return [...ALL_EVENTS, ...extra];
 }
 
-function getBookedCount(evId) {
-    return getTickets().filter(t => Number(t.eventId) === Number(evId)).length;
+async function getBookedCount(evId) {
+    try {
+        const res = await fetch(`http://127.0.0.1:5000/get-booked-count/${evId}`);
+        const data = await res.json();
+        return data.booked;
+    } catch {
+        return getTickets().filter(t => Number(t.eventId) === Number(evId)).length;
+    }
 }
 
-window.onload = function() {
+window.onload = async function() {
     const id = getEventId();
     const ev = getAllEvents().find(e => e.id == id);
     if (!ev) { document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;">Event not found. <a href="index.html" style="color:#00c9a7;">Go Home</a></div>'; return; }
     currentEvent = ev;
-    render(ev);
+    await render(ev);
     renderReviews(ev.id);
+    setInterval(() => renderSeats(ev), 3000);
 };
 
-function render(ev) {
+async function render(ev) {
     document.title = `EventHub | ${ev.title}`;
     document.getElementById('heroImg').src        = ev.image;
     document.getElementById('detailTag').textContent   = ev.category.toUpperCase();
@@ -237,7 +244,15 @@ function render(ev) {
     document.getElementById('orgName').textContent = orgName;
 
     // Seats
-    const booked   = getBookedCount(ev.id);
+    await renderSeats(ev);
+
+    // Fav
+    const isFav = getFavs().includes(ev.id);
+    document.getElementById('favBtn').textContent = isFav ? '❤️' : '🤍';
+}
+
+async function renderSeats(ev) {
+    const booked   = await getBookedCount(ev.id);
     const left     = Math.max(ev.capacity - booked, 0);
     const pct      = ev.capacity ? Math.min(Math.round(booked / ev.capacity * 100), 100) : 0;
     document.getElementById('seatsText').textContent = `${left} of ${ev.capacity} left`;
@@ -248,10 +263,6 @@ function render(ev) {
     const bookBtn = document.getElementById('bookBtn');
     bookBtn.textContent = isFull ? 'Sold Out' : 'Book Now';
     bookBtn.disabled    = isFull;
-
-    // Fav
-    const isFav = getFavs().includes(ev.id);
-    document.getElementById('favBtn').textContent = isFav ? '❤️' : '🤍';
 }
 
 function toggleFav() {

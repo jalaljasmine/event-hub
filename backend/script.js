@@ -1,18 +1,23 @@
 // ── EVENT DATA ─────────────────────────────────────────────────────────────
-const ALL_EVENTS = [
-    { id:1,  title:"National Music Festival",   category:"music",    date:"May 30, 2026", time:"6:00 PM",  location:"Siddhartha Amphitheatre, Vijayawada", price:499,  capacity:200, image:"event1.jpg" },
-    { id:2,  title:"Symphony of Sound",         category:"classical",date:"Jun 10, 2026", time:"7:30 PM",  location:"Tummalapalli Kalakshetram, Vijayawada",price:750,  capacity:150, image:"event2.jpg" },
-    { id:3,  title:"Jazz After Dark",           category:"jazz",     date:"May 28, 2026", time:"8:00 PM",  location:"PWD Grounds, Vijayawada",            price:350,  capacity:100, image:"event3.jpg" },
-    { id:4,  title:"Hip-Hop Nation Tour",       category:"hiphop",   date:"Jul 1, 2026",  time:"7:00 PM",  location:"IGMC Stadium, Vijayawada",            price:899,  capacity:500, image:"event4.jpg" },
-    { id:5,  title:"TechFest Vijayawada 2026",  category:"tech",     date:"Jun 20, 2026", time:"9:00 AM",  location:"SRM University, Vijayawada",          price:299,  capacity:300, image:"event5.jpg" },
-    { id:6,  title:"Food & Culture Fest",       category:"food",     date:"Jun 5, 2026",  time:"11:00 AM", location:"Rajiv Gandhi Park, Vijayawada",       price:150,  capacity:400, image:"event6.jpg" },
-    { id:7,  title:"Cricket Premier League",    category:"sports",   date:"Jun 15, 2026", time:"3:00 PM",  location:"Indira Gandhi Stadium, Vijayawada",   price:400,  capacity:1000,image:"event7.jpg" },
-    { id:8,  title:"Alternative Waves Fest",    category:"music",    date:"Jul 12, 2026", time:"5:00 PM",  location:"Bhavani Island, Vijayawada",          price:550,  capacity:250, image:"event1.jpg" },
-    { id:9,  title:"Startup Summit 2026",       category:"tech",     date:"Jul 8, 2026",  time:"9:30 AM",  location:"VUDA Community Hall, Vijayawada",     price:199,  capacity:180, image:"event9.jpg" },
-    { id:10, title:"Classical Fusion Night",    category:"classical",date:"Jun 25, 2026", time:"7:00 PM",  location:"Punnami Ghat Grounds, Vijayawada",    price:600,  capacity:120, image:"event2.jpg" },
-    { id:11, title:"Spice Food Trail",          category:"food",     date:"May 25, 2026", time:"10:00 AM", location:"Kanaka Durga Road, Vijayawada",       price:120,  capacity:350, image:"event6.jpg" },
-    { id:12, title:"Dance Mania Championship",  category:"music",    date:"Jul 20, 2026", time:"4:00 PM",  location:"JNTU Auditorium, Vijayawada",         price:250,  capacity:220, image:"event12.jpg"},
-];
+let ALL_EVENTS = [];
+
+async function fetchEvents() {
+    try {
+        const res = await fetch('http://127.0.0.1:5000/events');
+        const data = await res.json();
+        if (data.success) {
+            ALL_EVENTS = data.events;
+            // Update UI
+            if (typeof renderAll === 'function') renderAll(ALL_EVENTS);
+            if (typeof renderFeatured === 'function') renderFeatured();
+            if (typeof applyFilters === 'function') applyFilters();
+        }
+    } catch (err) {
+        console.error("Failed to fetch events:", err);
+    }
+}
+// Initial fetch
+fetchEvents();
 // ── STATE ──────────────────────────────────────────────────────────────────
 let pendingBooking = null;
 let showingAll = false;
@@ -26,12 +31,17 @@ const getNotifs  = () => JSON.parse(localStorage.getItem('eventhub_notifs')    |
 const saveFavs   = f => localStorage.setItem('eventhub_favorites', JSON.stringify(f));
 const saveTickets= t => localStorage.setItem('eventhub_tickets',   JSON.stringify(t));
 const saveNotifs = n => localStorage.setItem('eventhub_notifs',    JSON.stringify(n));
-const getBookedCount = (eventId) =>
-    getTickets().filter(t => Number(t.eventId) === Number(eventId)).length;
+const getBookedCount = (eventId) => {
+    const ev = ALL_EVENTS.find(e => Number(e.id) === Number(eventId));
+    return ev ? (ev.bookedCount || 0) : 0;
+};
 
-const isSoldOut = (ev) => getBookedCount(ev.id) >= ev.capacity;
+const isSoldOut = (ev) => seatsLeft(ev) <= 0;
 
-const seatsLeft = (ev) => Math.max(ev.capacity - getBookedCount(ev.id), 0);
+const seatsLeft = (ev) => {
+    if (ev.seatsLeft !== undefined) return ev.seatsLeft;
+    return Math.max((ev.capacity || 0) - (ev.bookedCount || 0), 0);
+};
 
 // ── WELCOME ────────────────────────────────────────────────────────────────
 function checkWelcome() {
@@ -99,6 +109,9 @@ function imgError(el) {
     const isFav = getFavs().includes(ev.id);
     const full = isSoldOut(ev);
 
+    const available = seatsLeft(ev);
+    const booked = Math.max((ev.capacity || 0) - available, 0);
+
     return `
         <div class="ev-card-h">
             <div class="ev-img-wrap">
@@ -110,7 +123,10 @@ function imgError(el) {
                 <h3>${ev.title}</h3>
                 <p class="ev-meta">📅 ${ev.date} • ${ev.time}</p>
                 <p class="ev-meta">📍 ${ev.location}</p>
-                <p class="ev-meta">🎫 ${full ? 'Sold out' : `${seatsLeft(ev)} / ${ev.capacity} seats left`}</p>
+                <p class="ev-meta" style="display:flex;align-items:center;gap:6px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${full ? '#ff4757' : '#06d6a0'};"></span>
+                    ${full ? 'Sold out' : `${booked}/${ev.capacity} seats · ${available} available`}
+                </p>
                 <div class="ev-price">₹${ev.price}</div>
                 <button class="ev-book-btn ${full ? 'sold-out' : ''}" onclick="openBooking(${ev.id})" ${full ? 'disabled' : ''}>
                     ${full ? 'Event Full' : 'Book Now'}
@@ -123,6 +139,9 @@ function makeGridCard(ev) {
     const isFav = getFavs().includes(ev.id);
     const full = isSoldOut(ev);
 
+    const available = seatsLeft(ev);
+    const booked = Math.max((ev.capacity || 0) - available, 0);
+
     return `
         <div class="ev-card-grid">
             <div class="ev-img-wrap" style="height:180px;">
@@ -134,7 +153,10 @@ function makeGridCard(ev) {
                 <h3>${ev.title}</h3>
                 <p class="ev-meta">📅 ${ev.date} • ${ev.time}</p>
                 <p class="ev-meta">📍 ${ev.location}</p>
-                <p class="ev-meta">🎫 ${full ? 'Sold out' : `${seatsLeft(ev)} / ${ev.capacity} seats left`}</p>
+                <p class="ev-meta" style="display:flex;align-items:center;gap:6px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${full ? '#ff4757' : '#06d6a0'};"></span>
+                    ${full ? 'Sold out' : `${booked}/${ev.capacity} seats · ${available} available`}
+                </p>
                 <div class="ev-price">₹${ev.price}</div>
                 <button class="ev-book-btn ${full ? 'sold-out' : ''}" onclick="openBooking(${ev.id})" ${full ? 'disabled' : ''}>
                     ${full ? 'Event Full' : 'Book Now'}
@@ -325,13 +347,23 @@ function openBooking(id) {
     }
 
     pendingBooking = ev;
+    const qtyInput = document.getElementById('bookingQty');
+    if (qtyInput) qtyInput.value = 1;
+
     document.getElementById('modalEventInfo').innerHTML = `
         <strong>${ev.title}</strong><br/>
         📅 ${ev.date} • ${ev.time}<br/>
         📍 ${ev.location}<br/>
         🎫 ${seatsLeft(ev)} / ${ev.capacity} seats left`;
-    document.getElementById('modalPrice').textContent = `₹${ev.price}`;
+    updateModalPrice();
     document.getElementById('bookingModal').classList.add('show');
+}
+
+function updateModalPrice() {
+    if (!pendingBooking) return;
+    const qty = parseInt(document.getElementById('bookingQty')?.value || 1);
+    const totalPrice = pendingBooking.price * qty;
+    document.getElementById('modalPrice').textContent = `Total: ₹${totalPrice}`;
 }
 
 async function confirmBooking() {
@@ -339,6 +371,7 @@ async function confirmBooking() {
 
     const ev = pendingBooking;
     const user = getUser();
+    const qty = parseInt(document.getElementById('bookingQty')?.value || 1);
     const btn = document.querySelector('#bookingModal .btn-confirm');
     btn.disabled = true;
     btn.textContent = 'Booking...';
@@ -354,7 +387,8 @@ async function confirmBooking() {
                 date: ev.date,
                 time: ev.time,
                 location: ev.location,
-                price: ev.price
+                price: ev.price,
+                quantity: qty
             })
         });
 
@@ -370,6 +404,9 @@ async function confirmBooking() {
         const tickets = getTickets();
         tickets.push({ ...ev, ticketId, bookedOn: new Date().toLocaleDateString(), email: user.email });
         saveTickets(tickets);
+
+        // REFRESH LIVE SEATS
+        await fetchEvents();
 
         addNotif(`🎟️ Ticket booked for "${ev.title}" — ID: ${ticketId}`);
         closeModal();
@@ -522,5 +559,8 @@ window.onload = function () {
     updateAuthUI();
     updateBadges();
     renderAll(ALL_EVENTS);
+    
+    // Auto-refresh seat availability every 3 seconds so users see real-time bookings
+    setInterval(fetchEvents, 3000);
 };
 

@@ -11,10 +11,31 @@ DB_FILE = os.path.join(os.path.dirname(__file__), 'db.json')
 
 def load_db():
     if not os.path.exists(DB_FILE):
-        return {"users": [], "tickets": [], "events": [], "reviews": {}}
+        db = {
+            "users": [],
+            "tickets": [],
+            "events": [
+                { "id":1,  "title":"National Music Festival",   "category":"music",    "date":"May 30, 2026", "time":"6:00 PM",  "location":"Siddhartha Amphitheatre, Vijayawada", "price":499,  "capacity":200, "image":"event1.jpg" },
+                { "id":2,  "title":"Symphony of Sound",         "category":"classical","date":"Jun 10, 2026", "time":"7:30 PM",  "location":"Tummalapalli Kalakshetram, Vijayawada","price":750,  "capacity":150, "image":"event2.jpg" },
+                { "id":3,  "title":"Jazz After Dark",           "category":"jazz",     "date":"May 28, 2026", "time":"8:00 PM",  "location":"PWD Grounds, Vijayawada",            "price":350,  "capacity":100, "image":"event3.jpg" },
+                { "id":4,  "title":"Hip-Hop Nation Tour",       "category":"hiphop",   "date":"Jul 1, 2026",  "time":"7:00 PM",  "location":"IGMC Stadium, Vijayawada",            "price":899,  "capacity":500, "image":"event4.jpg" },
+                { "id":5,  "title":"TechFest Vijayawada 2026",  "category":"tech",     "date":"Jun 20, 2026", "time":"9:00 AM",  "location":"SRM University, Vijayawada",          "price":299,  "capacity":300, "image":"event5.jpg" },
+                { "id":6,  "title":"Food & Culture Fest",       "category":"food",     "date":"Jun 5, 2026",  "time":"11:00 AM", "location":"Rajiv Gandhi Park, Vijayawada",       "price":150,  "capacity":400, "image":"event6.jpg" },
+                { "id":7,  "title":"Cricket Premier League",    "category":"sports",   "date":"Jun 15, 2026", "time":"3:00 PM",  "location":"Indira Gandhi Stadium, Vijayawada",   "price":400,  "capacity":1000,"image":"event7.jpg" },
+                { "id":8,  "title":"Alternative Waves Fest",    "category":"music",    "date":"Jul 12, 2026", "time":"5:00 PM",  "location":"Bhavani Island, Vijayawada",          "price":550,  "capacity":250, "image":"event1.jpg" },
+                { "id":9,  "title":"Startup Summit 2026",       "category":"tech",     "date":"Jul 8, 2026",  "time":"9:30 AM",  "location":"VUDA Community Hall, Vijayawada",     "price":199,  "capacity":180, "image":"event9.jpg" },
+                { "id":10, "title":"Classical Fusion Night",    "category":"classical","date":"Jun 25, 2026", "time":"7:00 PM",  "location":"Punnami Ghat Grounds, Vijayawada",    "price":600,  "capacity":120, "image":"event2.jpg" },
+                { "id":11, "title":"Spice Food Trail",          "category":"food",     "date":"May 25, 2026", "time":"10:00 AM", "location":"Kanaka Durga Road, Vijayawada",       "price":120,  "capacity":350, "image":"event6.jpg" },
+                { "id":12, "title":"Dance Mania Championship",  "category":"music",    "date":"Jul 20, 2026", "time":"4:00 PM",  "location":"JNTU Auditorium, Vijayawada",         "price":250,  "capacity":220, "image":"event12.jpg"}
+            ],
+            "tickets": [],
+            "reviews": {}
+        }
+        return db
     with open(DB_FILE) as f:
         data = json.load(f)
     data.setdefault("events",  [])
+    data.setdefault("tickets", [])
     data.setdefault("reviews", {})
     return data
 
@@ -66,6 +87,13 @@ def get_events():
     db     = load_db()
     email  = request.args.get('organizer')
     events = db.get('events', [])
+    
+    # Enrich events with booked count
+    tickets = db.get('tickets', [])
+    for ev in events:
+        ev['bookedCount'] = len([t for t in tickets if str(t.get('eventId')) == str(ev.get('id'))])
+        ev['seatsLeft']   = max(0, ev.get('capacity', 0) - ev['bookedCount'])
+
     if email:
         events = [e for e in events if e.get('organizer') == email]
     return jsonify({"success": True, "events": events})
@@ -111,22 +139,36 @@ def book_ticket():
     data = request.json
     db   = load_db()
     event_id = data.get('eventId')
+    quantity = int(data.get('quantity', 1))
+    
     ev = next((e for e in db.get('events',[]) if str(e['id']) == str(event_id)), None)
     if ev:
         booked = len([t for t in db['tickets'] if str(t.get('eventId')) == str(event_id)])
-        if booked >= ev.get('capacity', 999):
-            return jsonify({"success": False, "full": True, "message": "Event is fully booked."})
-    ticket = {
-        "ticketId": "TKT" + str(uuid.uuid4())[:6].upper(),
-        "email": data.get('email'), "eventId": event_id,
-        "title": data.get('title'), "date": data.get('date'),
-        "time": data.get('time'), "location": data.get('location'),
-        "price": data.get('price'), "paymentId": data.get('paymentId',''),
-        "seatNum": data.get('seatNum',''), "bookedOn": datetime.now().isoformat()
-    }
-    db['tickets'].append(ticket)
+        if booked + quantity > ev.get('capacity', 999):
+            return jsonify({"success": False, "full": True, "message": "Not enough seats available."})
+    
+    new_tickets = []
+    for _ in range(quantity):
+        ticket = {
+            "ticketId": "TKT" + str(uuid.uuid4())[:6].upper(),
+            "email": data.get('email'), "eventId": event_id,
+            "title": data.get('title'), "date": data.get('date'),
+            "time": data.get('time'), "location": data.get('location'),
+            "price": data.get('price'), "paymentId": data.get('paymentId',''),
+            "seatNum": data.get('seatNum',''), "bookedOn": datetime.now().isoformat()
+        }
+        db['tickets'].append(ticket)
+        new_tickets.append(ticket)
+    
     save_db(db)
-    return jsonify({"success": True, "ticketId": ticket['ticketId']})
+    return jsonify({"success": True, "ticketId": new_tickets[0]['ticketId'], "count": quantity})
+
+# Get real-time booked count for an event
+@app.route('/get-booked-count/<event_id>', methods=['GET'])
+def get_booked_count(event_id):
+    db = load_db()
+    booked = len([t for t in db.get('tickets', []) if str(t.get('eventId')) == str(event_id)])
+    return jsonify({"success": True, "eventId": event_id, "booked": booked})
 
 @app.route('/my-tickets', methods=['GET'])
 def my_tickets():
@@ -191,3 +233,55 @@ if __name__ == '__main__':
     print("✅ EventHub running → http://127.0.0.1:5000")
     print("💡 Set ANTHROPIC_API_KEY for real AI")
     app.run(debug=True, port=5000)
+from flask import Flask, send_from_directory, request, jsonify
+from flask_cors import CORS
+import os, json, uuid
+from datetime import datetime
+
+FRONTEND = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+app = Flask(__name__, static_folder=FRONTEND, static_url_path='')
+CORS(app)
+
+DB_FILE = os.path.join(os.path.dirname(__file__), 'db.json')
+
+DEFAULT_EVENTS = [
+    { "id":1,  "title":"National Music Festival",   "category":"music",    "date":"May 30, 2026", "time":"6:00 PM",  "location":"Siddhartha Amphitheatre, Vijayawada", "price":499,  "capacity":200, "image":"event1.jpg" },
+    { "id":2,  "title":"Symphony of Sound",         "category":"classical","date":"Jun 10, 2026", "time":"7:30 PM",  "location":"Tummalapalli Kalakshetram, Vijayawada","price":750,  "capacity":150, "image":"event2.jpg" },
+    { "id":3,  "title":"Jazz After Dark",           "category":"jazz",     "date":"May 28, 2026", "time":"8:00 PM",  "location":"PWD Grounds, Vijayawada",            "price":350,  "capacity":100, "image":"event3.jpg" },
+    { "id":4,  "title":"Hip-Hop Nation Tour",       "category":"hiphop",   "date":"Jul 1, 2026",  "time":"7:00 PM",  "location":"IGMC Stadium, Vijayawada",            "price":899,  "capacity":500, "image":"event4.jpg" },
+    { "id":5,  "title":"TechFest Vijayawada 2026",  "category":"tech",     "date":"Jun 20, 2026", "time":"9:00 AM",  "location":"SRM University, Vijayawada",          "price":299,  "capacity":300, "image":"event5.jpg" },
+    { "id":6,  "title":"Food & Culture Fest",       "category":"food",     "date":"Jun 5, 2026",  "time":"11:00 AM", "location":"Rajiv Gandhi Park, Vijayawada",       "price":150,  "capacity":400, "image":"event6.jpg" },
+    { "id":7,  "title":"Cricket Premier League",    "category":"sports",   "date":"Jun 15, 2026", "time":"3:00 PM",  "location":"Indira Gandhi Stadium, Vijayawada",   "price":400,  "capacity":1000,"image":"event7.jpg" },
+    { "id":8,  "title":"Alternative Waves Fest",    "category":"music",    "date":"Jul 12, 2026", "time":"5:00 PM",  "location":"Bhavani Island, Vijayawada",          "price":550,  "capacity":250, "image":"event1.jpg" },
+    { "id":9,  "title":"Startup Summit 2026",       "category":"tech",     "date":"Jul 8, 2026",  "time":"9:30 AM",  "location":"VUDA Community Hall, Vijayawada",     "price":199,  "capacity":180, "image":"event9.jpg" },
+    { "id":10, "title":"Classical Fusion Night",    "category":"classical","date":"Jun 25, 2026", "time":"7:00 PM",  "location":"Punnami Ghat Grounds, Vijayawada",    "price":600,  "capacity":120, "image":"event2.jpg" },
+    { "id":11, "title":"Spice Food Trail",          "category":"food",     "date":"May 25, 2026", "time":"10:00 AM", "location":"Kanaka Durga Road, Vijayawada",       "price":120,  "capacity":350, "image":"event6.jpg" },
+    { "id":12, "title":"Dance Mania Championship",  "category":"music",    "date":"Jul 20, 2026", "time":"4:00 PM",  "location":"JNTU Auditorium, Vijayawada",         "price":250,  "capacity":220, "image":"event12.jpg"}
+]
+
+def load_db():
+    if not os.path.exists(DB_FILE):
+        return {
+            "users": [],
+            "tickets": [],
+            "events": DEFAULT_EVENTS.copy(),
+            "reviews": {}
+        }
+
+    with open(DB_FILE) as f:
+        data = json.load(f)
+
+    data.setdefault("users", [])
+    data.setdefault("tickets", [])
+    data.setdefault("events", [])
+    data.setdefault("reviews", {})
+
+    if not data["events"]:
+        data["events"] = DEFAULT_EVENTS.copy()
+        save_db(data)
+
+    return data
+
+def save_db(db):
+    with open(DB_FILE, 'w') as f:
+        json.dump(db, f, indent=2)
